@@ -25,6 +25,7 @@ import model
 import time
 import csv
 import tracemalloc
+from DISClib.ADT import list as lt
 
 """
 El controlador se encarga de mediar entre la vista y el modelo.
@@ -41,12 +42,56 @@ def new_controller():
 
 # Funciones para la carga de datos
 
-def load_data(control, filename):
+def load_data(control, filegoalscorers, fileresults, fileshootouts):
     """
     Carga los datos del reto
     """
     # TODO: Realizar la carga de datos
-    pass
+    archivos =lt.newList()
+    lt.addLast(archivos,filegoalscorers)
+    lt.addLast(archivos,fileresults)
+    lt.addLast(archivos,fileshootouts)
+    
+    for archivo in lt.iterator(archivos):
+        file = cf.data_dir  + archivo
+        input_file = csv.DictReader(open(file, encoding='utf-8'))
+        if "goal_scorers" in archivo:
+            llave = "goal_scorers"
+        elif "results" in archivo: 
+            llave = "results"
+        else: 
+            llave = "shootouts"
+        for dato in input_file:
+            
+            model.addData(control[llave], dato)
+    
+        
+    
+def load_goal_scorers(n_d, filename):
+    goals_file = cf.data_dir  +filename
+    input_file = csv.DictReader(open(goals_file, encoding='utf-8'))
+    
+    for goals in input_file:
+        model.addData(n_d, goals)
+    
+    return model.dataSize(n_d)
+
+
+        
+def load_results(n_d, filename):
+    resultsfile = cf.data_dir + filename
+    input_file = csv.DictReader(open(resultsfile, encoding='utf-8'))
+    for results in input_file:
+        model.addData(n_d, results)
+    return model.dataSize(n_d)
+
+
+def load_shootouts(n_d, filename):
+    shootoutsfile = cf.data_dir  + filename
+    input_file = csv.DictReader(open(shootoutsfile, encoding='utf-8'))
+    for shootout in input_file:
+        model.addData(n_d, shootout)
+    return model.dataSize(n_d)
 
 
 # Funciones de ordenamiento

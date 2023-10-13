@@ -37,7 +37,7 @@ from DISClib.Algorithms.Sorting import selectionsort as se
 from DISClib.Algorithms.Sorting import mergesort as merg
 from DISClib.Algorithms.Sorting import quicksort as quk
 assert cf
-
+from datetime import date
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá
 dos listas, una para los videos, otra para las categorias de los mismos.
@@ -46,35 +46,37 @@ dos listas, una para los videos, otra para las categorias de los mismos.
 # Construccion de modelos
 
 
-def new_data_structs():
+def new_data_structs(formato):
     """
     Inicializa las estructuras de datos del modelo. Las crea de
     manera vacía para posteriormente almacenar la información.
     """
     #TODO: Inicializar las estructuras de datos
-    pass
+    n_d = {"goal_scorers": mp.newMap(formato),
+           "results": mp.newMap(formato),
+           "shootouts": mp.newMap(formato)}
+
+    
+    return n_d
+
 
 
 # Funciones para agregar informacion al modelo
 
-def add_data(data_structs, data):
+def addData(data_structs, data):
     """
     Función para agregar nuevos elementos a la lista
     """
     #TODO: Crear la función para agregar elementos a una lista
-    pass
-
-
-# Funciones para creacion de datos
-
-def new_data(id, info):
-    """
-    Crea una nueva estructura para modelar los datos
-    """
-    #TODO: Crear la función para estructurar los datos
-    pass
-
-
+    
+    data_date = date.fromisoformat(data["date"])
+    anio = data_date.year
+    
+    if mp.contains(data_structs, data[anio]):   
+        
+        
+        
+        
 # Funciones de consulta
 
 def get_data(data_structs, id):
