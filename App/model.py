@@ -72,10 +72,14 @@ def addData(data_structs, data):
     data_date = date.fromisoformat(data["date"])
     anio = data_date.year
     
-    if mp.contains(data_structs, data[anio]):   
-        
-        
-        
+    if not mp.contains(data_structs, anio):
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
+        mp.put(data_structs, anio, elem)
+    else:
+        k_v = mp.get(data_structs,anio)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)       
         
 # Funciones de consulta
 
