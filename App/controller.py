@@ -26,6 +26,8 @@ import time
 import csv
 import tracemalloc
 from DISClib.ADT import list as lt
+from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
 
 """
 El controlador se encarga de mediar entre la vista y el modelo.
@@ -37,12 +39,38 @@ def new_controller():
     Crea una instancia del modelo
     """
     #TODO: Llamar la función del modelo que crea las estructuras de datos
-    pass
+    control = {
+        'model':None
+    }
+    control['model']=model.new_data_structs()
+    return control
 
 
 # Funciones para la carga de datos
+def load_data(control, data_size):
+    filegoalscorers = load_goal_scorers(data_size)
+    fileresults = load_results(data_size)
+    fileshootouts = load_shootouts(data_size)
+    load_data_mask(control['model'], filegoalscorers, fileresults, fileshootouts)
+    scorers = control['model']['goal_scorers']
+    scorers_size = mp.size(scorers)
+    scorers_values = mp.valueSet(scorers)
+    #Se devolverá esta lista nativa de python para que tabulate pueda procesarla.
+    return_scorers = []
+    #Mira si hay más de 6 elementos en la data structure con los jugadores.
+    if scorers_size>6:
+        for i in range(1,7):
+            elem = lt.getElement(scorers_values,i)
+            return_scorers.append(elem)
+    else:
+        for i in range(1,scorers_size+1):
+            elem = lt.getElement(scorers_values, i)
+            return_scorers.append(elem)
+    
+    return return_scorers
+    
 
-def load_data(control, filegoalscorers, fileresults, fileshootouts):
+def load_data_mask(control, filegoalscorers, fileresults, fileshootouts):
     """
     Carga los datos del reto
     """
@@ -51,11 +79,10 @@ def load_data(control, filegoalscorers, fileresults, fileshootouts):
     lt.addLast(archivos,filegoalscorers)
     lt.addLast(archivos,fileresults)
     lt.addLast(archivos,fileshootouts)
-    
     for archivo in lt.iterator(archivos):
         file = cf.data_dir  + archivo
         input_file = csv.DictReader(open(file, encoding='utf-8'))
-        if "goal_scorers" in archivo:
+        if "goalscorers" in archivo:
             llave = "goal_scorers"
         elif "results" in archivo: 
             llave = "results"
@@ -63,11 +90,70 @@ def load_data(control, filegoalscorers, fileresults, fileshootouts):
             llave = "shootouts"
         for dato in input_file:
             
-            model.addData(control[llave], dato)
+            model.addData(control, dato, llave)
     
         
     
-def load_goal_scorers(n_d, filename):
+def load_goal_scorers(data_size):
+    if data_size==1:
+     scores_file =  'goalscorers-utf8-small.csv'
+    elif data_size==2:
+        scores_file =  'goalscorers-utf8-5pct.csv'
+    elif data_size==3:
+        scores_file =  'goalscorers-utf8-10pct.csv'
+    elif data_size==4:
+        scores_file =  'goalscorers-utf8-20pct.csv'
+    elif data_size==5:
+        scores_file =   'goalscorers-utf8-30pct.csv'
+    elif data_size==6:
+        scores_file =   'goalscorers-utf8-50pct.csv'
+    elif data_size==7:
+        scores_file =  'goalscorers-utf8-80pct.csv'
+    elif data_size==8:
+        scores_file =  'goalscorers-utf8-large.csv'
+    return scores_file
+
+def load_shootouts(data_size):
+    if data_size==1:
+     file =  'shootouts-utf8-small.csv'
+    elif data_size==2:
+        file =  'shootouts-utf8-5pct.csv'
+    elif data_size==3:
+        file =  'shootouts-utf8-10pct.csv'
+    elif data_size==4:
+        file =  'shootouts-utf8-20pct.csv'
+    elif data_size==5:
+        file =  'shootouts-utf8-30pct.csv'
+    elif data_size==6:
+        file =  'shootouts-utf8-50pct.csv'
+    elif data_size==7:
+        file =  'shootouts-utf8-80pct.csv'
+    elif data_size==8:
+        file =  'shootouts-utf8-large.csv'
+    return file
+
+def load_results(data_size):
+    
+    if data_size==1:
+        match_file =  'results-utf8-small.csv'
+    elif data_size==2:
+        match_file = 'results-utf8-5pct.csv'
+    elif data_size==3:
+        match_file = 'results-utf8-10pct.csv'
+    elif data_size==4:
+        match_file =  'results-utf8-20pct.csv'
+    elif data_size==5:
+        match_file = 'results-utf8-30pct.csv'
+    elif data_size==6:
+        match_file = 'results-utf8-50pct.csv'
+    elif data_size==7:
+        match_file = 'results-utf8-80pct.csv'
+    elif data_size==8:
+        match_file = 'results-utf8-large.csv'
+    return match_file
+
+
+""" def load_goal_scorers(n_d, filename):
     goals_file = cf.data_dir  +filename
     input_file = csv.DictReader(open(goals_file, encoding='utf-8'))
     
@@ -75,9 +161,6 @@ def load_goal_scorers(n_d, filename):
         model.addData(n_d, goals)
     
     return model.dataSize(n_d)
-
-
-        
 def load_results(n_d, filename):
     resultsfile = cf.data_dir + filename
     input_file = csv.DictReader(open(resultsfile, encoding='utf-8'))
@@ -91,7 +174,7 @@ def load_shootouts(n_d, filename):
     input_file = csv.DictReader(open(shootoutsfile, encoding='utf-8'))
     for shootout in input_file:
         model.addData(n_d, shootout)
-    return model.dataSize(n_d)
+    return model.dataSize(n_d) """
 
 
 # Funciones de ordenamiento

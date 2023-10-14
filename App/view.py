@@ -45,7 +45,9 @@ def new_controller():
         Se crea una instancia del controlador
     """
     #TODO: Llamar la función del controlador donde se crean las estructuras de datos
-    pass
+    control = controller.new_controller()
+    return control
+
 
 
 def print_menu():
@@ -67,15 +69,30 @@ def load_data(control):
     Carga los datos
     """
     #TODO: Realizar la carga de datos
-    pass
+    message = """
+Ingrese 1 si quiere cargar una muestra pequeña de los datos. 
+Ingrese 2 si quiere cargar el 5 porciento de los datos.
+Ingrese 3 si quiere cargar el 10 porciento de los datos.
+Ingrese 4 si quiere cargar el 20 porciento de los datos
+Ingrese 5 si quiere cargar el 30 porciento de los datos.
+Ingrese 6 si quiere cargar el 50 porciento de los datos
+Ingrese 7 si quiere cargar el 80 porciento de los datos
+Ingrese 8 si quiere cargar TODOS los datos."""
+    data_size = int(input(message))
+    scorers = controller.load_data(control, data_size)
+    return scorers
 
+def print_loaded_data(control):
+    scorers = load_data(control)
+    print(f'Jugadores encontrados')
+    print(f'{tabulate(scorers,headers="keys",tablefmt="grid")}')
 
 def print_data(control, id):
     """
         Función que imprime un dato dado su ID
     """
     #TODO: Realizar la función para imprimir un elemento
-    pass
+    
 
 def print_req_1(control):
     """
@@ -156,7 +173,7 @@ if __name__ == "__main__":
         inputs = input('Seleccione una opción para continuar\n')
         if int(inputs) == 1:
             print("Cargando información de los archivos ....\n")
-            data = load_data(control)
+            print_loaded_data(control)
         elif int(inputs) == 2:
             print_req_1(control)
 

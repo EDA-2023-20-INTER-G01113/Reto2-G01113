@@ -46,15 +46,24 @@ dos listas, una para los videos, otra para las categorias de los mismos.
 # Construccion de modelos
 
 
-def new_data_structs(formato):
+def new_data_structs():
     """
     Inicializa las estructuras de datos del modelo. Las crea de
     manera vacía para posteriormente almacenar la información.
     """
     #TODO: Inicializar las estructuras de datos
-    n_d = {"goal_scorers": mp.newMap(formato),
-           "results": mp.newMap(formato),
-           "shootouts": mp.newMap(formato)}
+    n_d = {"goal_scorers": mp.newMap(42000, 
+                                     maptype="PROBING", 
+                                     loadfactor=0.5,
+                                     cmpfunction=compare_scorers),
+           "results": mp.newMap(45000, 
+                                maptype="PROBING",
+                                loadfactor=0.5,
+                                cmpfunction=compare_results),
+           "shootouts": mp.newMap(1000, 
+                                  maptype="PROBING",
+                                  loadfactor=0.5,
+                                  cmpfunction=compare_shootouts)}
 
     
     return n_d
@@ -63,23 +72,44 @@ def new_data_structs(formato):
 
 # Funciones para agregar informacion al modelo
 
-def addData(data_structs, data):
+def addData(data_structs, data, llave):
     """
     Función para agregar nuevos elementos a la lista
     """
     #TODO: Crear la función para agregar elementos a una lista
+    if llave == "goal_scorers":
+        add_scorer(data_structs[llave], data)
+    elif llave == "results":
+        add_result(data_structs[llave],data)
+    elif llave == "shootouts":
+        add_shootout(data_structs[llave], data)
     
-    data_date = date.fromisoformat(data["date"])
-    anio = data_date.year
     
-    if not mp.contains(data_structs, anio):
-        elem = lt.newList("ARRAY_LIST")
-        lt.addLast(elem,data)
-        mp.put(data_structs, anio, elem)
-    else:
-        k_v = mp.get(data_structs,anio)
-        value = me.getValue(k_v)
-        lt.addLast(value, data)       
+    
+          
+
+def add_result(data_structs, data):
+    pass
+def add_scorer(data_structs, data):
+    scorer= data["scorer"]
+    #Revisa que el campo de scorer y minuto no estén vacios
+    if scorer and data['minute']:
+        if not mp.contains(data_structs, scorer):
+            elem = {'scorer':scorer,'goals':1,'avg_time':float(data['minute'])}
+            #El elemento abajo contiene información de las anotaciones del jugador. Por ahora, se probará con el tiempo promedio y el número de goles
+            #elem = {'scorer':scorer,'goals':1,'scores':lt.newList('ARRAY_LIST',compare_scorers),'avg_time':float(data['minute'])}
+            #lt.addLast(elem['scores'],data)
+            mp.put(data_structs, scorer, elem)
+        else:
+            k_v = mp.get(data_structs,scorer)
+            scorer_info = me.getValue(k_v)
+            scorer_info['goals']+=1
+            lt.addLast(scorer_info['scores'], data)
+            #Usa una fórmula para calcular el nuevo promedio
+            scorer_info['avg_time']= ((scorer_info['avg_time']*(scorer_info['goals']-1))+float(data['minute']))/scorer_info['goals']
+            mp.put(data_structs, scorer, scorer_info)
+def add_shootout(data_structs, data):
+    pass
         
 # Funciones de consulta
 
@@ -171,7 +201,22 @@ def compare(data_1, data_2):
     """
     #TODO: Crear función comparadora de la lista
     pass
-
+def compare_scorers(data1, data2):
+    pass
+def compare_shootouts(data1, data2):
+    date1 = date.fromisoformat(data1['date'])
+    date2= date.fromisoformat(data2['date'])
+    if date1==date2 and data1['home_team']==data2['home_team'] and data1['away_team']== data2['away_team']:
+        return 0
+    elif date1>date2:
+        return 1
+    elif date1==date2 and data1['home_team']<data2['home_team']:
+        return 1
+    elif date1==date2 and data1['home_team']==data2['home_team'] and data1['away_team']<data2['away_team']:
+        return 1
+    return -1
+def compare_results(data1, data2):
+    pass
 # Funciones de ordenamiento
 
 
