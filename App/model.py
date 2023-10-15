@@ -56,7 +56,8 @@ def new_data_structs(formato):
            "results": mp.newMap(formato),
            "shootouts": mp.newMap(formato),
            "away_teams":mp.newMap(formato),
-           "home_teams":mp.newMap(formato)}
+           "home_teams":mp.newMap(formato), 
+           "teams":mp.newMap(formato)}
 
     
     return n_d
@@ -82,7 +83,7 @@ def addData(data_structs, data):
         k_v = mp.get(data_structs,anio)
         value = me.getValue(k_v)
         lt.addLast(value, data)  
-def agregar(data_home, data_away, data):
+def agregar(data_home, data_away, data_juntos, data):
 
     local = date.fromisoformat(data["home_team"])
     visitante= date.fromisoformat(data["away_team"])
@@ -103,6 +104,24 @@ def agregar(data_home, data_away, data):
         k_v = mp.get(data_away,visitante)
         value = me.getValue(k_v)
         lt.addLast(value, data) 
+    if not mp.contains(data_juntos,visitante ):
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
+        mp.put(data_juntos,visitante, elem)
+    else:
+        k_v = mp.get(data_juntos,visitante)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+    if not mp.contains(data_juntos,local ):
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
+        mp.put(data_juntos,local, elem)
+    else:
+        k_v = mp.get(data_juntos,local)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+     
+    
         
 # Funciones de consulta
 
@@ -122,10 +141,23 @@ def data_size(data_structs):
     pass
 
 
-def req_1(data_structs):
+def req_1(data_structs, condicion,pais):
     """
     Función que soluciona el requerimiento 1
     """
+    if condicion == "local":
+        estructura=data_structs["home_teams"]
+        lista= mp.get(estructura,pais)
+        return me.getValue(estructura,lista)
+    elif condicion == "visitante":
+        estructura=data_structs["away_teams"]
+        lista= mp.get(estructura,pais)
+        return me.getValue(estructura,lista)
+    else:
+        estructura= data_structs["teams"]
+        lista= mp.get(estructura,pais)
+        return me.getValue(estructura,lista)
+
     # TODO: Realizar el requerimiento 1
     pass
 
