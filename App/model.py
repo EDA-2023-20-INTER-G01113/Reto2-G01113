@@ -54,7 +54,9 @@ def new_data_structs(formato):
     #TODO: Inicializar las estructuras de datos
     n_d = {"goal_scorers": mp.newMap(formato),
            "results": mp.newMap(formato),
-           "shootouts": mp.newMap(formato)}
+           "shootouts": mp.newMap(formato),
+           "away_teams":mp.newMap(formato),
+           "home_teams":mp.newMap(formato)}
 
     
     return n_d
@@ -79,7 +81,28 @@ def addData(data_structs, data):
     else:
         k_v = mp.get(data_structs,anio)
         value = me.getValue(k_v)
-        lt.addLast(value, data)       
+        lt.addLast(value, data)  
+def agregar(data_home, data_away, data):
+
+    local = date.fromisoformat(data["home_team"])
+    visitante= date.fromisoformat(data["away_team"])
+    
+    if not mp.contains(data_home,local ):
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
+        mp.put(data_home,local, elem)
+    else:
+        k_v = mp.get(data_home,local)
+        value = me.getValue(k_v)
+        lt.addLast(value, data) 
+    if not mp.contains(data_away,visitante ):
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
+        mp.put(data_away,visitante, elem)
+    else:
+        k_v = mp.get(data_away,visitante)
+        value = me.getValue(k_v)
+        lt.addLast(value, data) 
         
 # Funciones de consulta
 
