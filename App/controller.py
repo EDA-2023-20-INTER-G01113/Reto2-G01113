@@ -48,15 +48,25 @@ def new_controller():
 
 # Funciones para la carga de datos
 def load_data(control, data_size):
+    #Indica la ruta de los archivos
     filegoalscorers = load_goal_scorers(data_size)
     fileresults = load_results(data_size)
     fileshootouts = load_shootouts(data_size)
+
+    #Carga los datos y los ordena
     load_data_mask(control['model'], filegoalscorers, fileresults, fileshootouts)
+    model.sort(control['model'])
+
+    results = control['model']['results']
     scorers = control['model']['goal_scorers']
+    shootouts= control['model']['shootouts']
     scorers_size = mp.size(scorers)
     scorers_values = mp.valueSet(scorers)
+
     #Se devolverá esta lista nativa de python para que tabulate pueda procesarla.
     return_scorers = []
+    return_results= []
+    return_shootouts=[]
     #Mira si hay más de 6 elementos en la data structure con los jugadores.
     if scorers_size>6:
         for i in range(1,7):
@@ -66,8 +76,116 @@ def load_data(control, data_size):
         for i in range(1,scorers_size+1):
             elem = lt.getElement(scorers_values, i)
             return_scorers.append(elem)
+
+    #Listas donde se guardarán los años presentes en el archivo de partidos y penalties.
+    r_years= lt.newList('ARRAY_LIST')
+    s_years = lt.newList('ARRAY_LIST')  
+
+    r_keys= mp.keySet(results)
+    for key in lt.iterator(r_keys):
+        lt.addLast(r_years, key)
     
-    return return_scorers
+    s_keys=mp.keySet(shootouts)
+    for key in lt.iterator(s_keys):
+        lt.addLast(s_years, key)
+    
+    #Ordena los años de más reciente a más antiguo
+    model.sort_years_new_first(r_years)
+    model.sort_years_new_first(s_years)
+
+    #Mira el número de partidos
+    n_results= 0
+    for year in lt.iterator(r_keys):
+        k_v=mp.get(results, year)
+        value = me.getValue(k_v)
+        n_results+=lt.size(value)
+    
+    #Mira si hay más de 6 partidos
+    if n_results<=6:
+        for year in lt.iterator(r_keys):
+            k_v = mp.get(results, year)
+            value = me.getValue(k_v)
+            for v in lt.iterator(value):
+                return_results.append(v)
+    else:
+        first_year = 1
+        first_results = 1
+        last_results = 1
+        last_year = lt.size(r_years)
+        
+        #Añade 3 primeros resultados
+        while first_results<=3:
+            i=1
+            year = lt.getElement(r_years, first_year)
+            k_v=mp.get(results, year)
+            value = me.getValue(k_v)
+            while i<=lt.size(value) and first_results<=3:
+                elem = lt.getElement(value, i)
+                return_results.append(elem)
+                first_results+=1
+                i+=1
+            first_year+=1
+        
+        #Añade últimos 3 resultados
+        while last_results<=3:
+            year = lt.getElement(r_years, last_year)
+            k_v=mp.get(results, year)
+            value = me.getValue(k_v)
+            i=lt.size(value)
+            while i>0 and last_results<=3:
+                elem = lt.getElement(value, i)
+                return_results.append(elem)
+                last_results+=1
+                i-=1
+            last_year-=1
+
+    #Cuenta el número de penalties
+    n_shootouts= 0
+    for year in lt.iterator(s_keys):
+        k_v=mp.get(shootouts, year)
+        value = me.getValue(k_v)
+        n_shootouts+=lt.size(value)
+
+    #Verifica si hay más de 6 penalties
+    if n_shootouts<=6:
+        for year in lt.iterator(s_keys):
+            k_v = mp.get(shootouts, year)
+            value = me.getValue(k_v)
+            for v in lt.iterator(value):
+                return_shootouts.append(v)
+    else:
+        first_year = 1
+        first_results = 1
+        last_results = 1
+        last_year = lt.size(s_years)
+        
+        #Añade 3 primeros resultados
+        while first_results<=3:
+            i=1
+            year = lt.getElement(s_years, first_year)
+            k_v=mp.get(shootouts, year)
+            value = me.getValue(k_v)
+            while i<=lt.size(value) and first_results<=3:
+                elem = lt.getElement(value, i)
+                return_shootouts.append(elem)
+                first_results+=1
+                i+=1
+            first_year+=1
+        
+        #Añade últimos 3 resultados
+        while last_results<=3:
+            year = lt.getElement(s_years, last_year)
+            k_v=mp.get(shootouts, year)
+            value = me.getValue(k_v)
+            i=lt.size(value)
+            while i>0 and last_results<=3:
+                elem = lt.getElement(value, i)
+                return_shootouts.append(elem)
+                last_results+=1
+                i-=1
+            last_year-=1
+
+    return return_scorers, return_results, return_shootouts, n_results, n_shootouts
     
 
 def load_data_mask(control, filegoalscorers, fileresults, fileshootouts):

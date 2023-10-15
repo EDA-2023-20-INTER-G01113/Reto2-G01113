@@ -89,7 +89,19 @@ def addData(data_structs, data, llave):
           
 
 def add_result(data_structs, data):
-    pass
+    data_date = date.fromisoformat(data["date"])
+    anio = data_date.year
+    
+    if not mp.contains(data_structs, anio):
+        elem = lt.newList("ARRAY_LIST", compare_results_list)
+        lt.addLast(elem,data)
+        mp.put(data_structs, anio, elem)
+    else:
+        k_v = mp.get(data_structs,anio)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+        mp.put(data_structs, anio, value)
+
 def add_scorer(data_structs, data):
     scorer= data["scorer"]
     #Revisa que el campo de scorer y minuto no estén vacios
@@ -104,13 +116,26 @@ def add_scorer(data_structs, data):
             k_v = mp.get(data_structs,scorer)
             scorer_info = me.getValue(k_v)
             scorer_info['goals']+=1
-            lt.addLast(scorer_info['scores'], data)
+            #lt.addLast(scorer_info['scores'], data)
             #Usa una fórmula para calcular el nuevo promedio
             scorer_info['avg_time']= ((scorer_info['avg_time']*(scorer_info['goals']-1))+float(data['minute']))/scorer_info['goals']
             mp.put(data_structs, scorer, scorer_info)
+
 def add_shootout(data_structs, data):
-    pass
-        
+    data_date = date.fromisoformat(data["date"])
+    anio = data_date.year
+    
+    if not mp.contains(data_structs, anio):
+        elem = lt.newList("ARRAY_LIST", cmpfunction=compare_shootouts_list)
+        lt.addLast(elem,data)
+        mp.put(data_structs, anio, elem)
+    else:
+        k_v = mp.get(data_structs,anio)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+        mp.put(data_structs, anio, value)
+
+
 # Funciones de consulta
 
 def get_data(data_structs, id):
@@ -201,9 +226,34 @@ def compare(data_1, data_2):
     """
     #TODO: Crear función comparadora de la lista
     pass
-def compare_scorers(data1, data2):
-    pass
-def compare_shootouts(data1, data2):
+
+def compare_scorers(keyname, scorer):
+    """Compara dos nombres de jugadores, el primero es una cadena y el segundo es un entry de un map"""
+    scorer_entry = me.getKey(scorer)
+    if keyname== scorer_entry:
+        return 0
+    elif keyname>scorer_entry:
+        return 1
+    else:
+        return -1
+
+def scorers_sort_criteria(data1, data2):
+    if int(data1['goals'])>int(data2['goals']):
+        return True
+    elif data1['goals']==data2['goals'] and float(data1['avg_time'])<float(data2['avg_time']):
+        return True
+    return False
+
+def compare_shootouts(keyname, shootout):
+    shootout_entry = me.getKey(shootout)
+    if keyname== shootout_entry:
+        return 0
+    elif keyname>shootout_entry:
+        return 1
+    else:
+        return -1
+    
+def compare_shootouts_list(data1, data2):
     date1 = date.fromisoformat(data1['date'])
     date2= date.fromisoformat(data2['date'])
     if date1==date2 and data1['home_team']==data2['home_team'] and data1['away_team']== data2['away_team']:
@@ -215,12 +265,42 @@ def compare_shootouts(data1, data2):
     elif date1==date2 and data1['home_team']==data2['home_team'] and data1['away_team']<data2['away_team']:
         return 1
     return -1
-def compare_results(data1, data2):
-    pass
-# Funciones de ordenamiento
 
 
-def sort_criteria(data_1, data_2):
+def shootouts_sort_criteria(data_1, data_2):
+    date1 = date.fromisoformat(data_1['date'])
+    date2 = date.fromisoformat(data_2['date'])
+    if date1>date2:
+        return True
+    elif date1==date2 and data_1['home_team']<data_2['home_team']:
+        return True
+    elif date1==date2 and data_1['home_team']==data_2['home_team'] and data_1['away_team']<data_2['away_team']:
+        return True
+    return False
+
+def compare_results(keyname, year):
+    year_entry = me.getKey(year)
+    if keyname==year_entry:
+        return 0
+    elif keyname>year_entry:
+        return 1
+    else:
+        return -1
+
+def compare_results_list(data1, data2):
+    date1 = date.fromisoformat(data1['date'])
+    date2= date.fromisoformat(data2['date'])
+    if date1==date2 and data1['home_team']==data2['home_team'] and data1['away_team']== data2['away_team']:
+        return 0
+    elif date1>date2:
+        return 1
+    elif date1==date2 and data1['home_team']<data2['home_team']:
+        return 1
+    elif date1==date2 and data1['home_team']==data2['home_team'] and data1['away_team']<data2['away_team']:
+        return 1
+    return -1
+
+def results_sort_criteria(data_1, data_2):
     """sortCriteria criterio de ordenamiento para las funciones de ordenamiento
 
     Args:
@@ -230,8 +310,24 @@ def sort_criteria(data_1, data_2):
     Returns:
         _type_: _description_
     """
-    #TODO: Crear función comparadora para ordenar
-    pass
+    
+
+    date1 = date.fromisoformat(data_1['date'])
+    date2 = date.fromisoformat(data_2['date'])
+
+    if date1>date2:
+        return True
+    elif date1==date2 and int(data_1['home_score'])>int(data_2['home_score']):
+        return True
+    elif date1==date2 and int(data_1['home_score'])+int(data_1['away_score'])>int(data_2['home_score'])+int(data_2['away_score']):
+        return True
+    return False
+
+def years_new_first_criteria(data1, data2):
+    if data1>data2:
+        return True
+    return False
+# Funciones de ordenamiento
 
 
 def sort(data_structs):
@@ -239,4 +335,29 @@ def sort(data_structs):
     Función encargada de ordenar la lista con los datos
     """
     #TODO: Crear función de ordenamiento
-    pass
+    shootouts= data_structs['shootouts']
+    results= data_structs['results']
+    scorers= data_structs['goal_scorers']
+
+    s_keys = mp.keySet(shootouts)
+    r_keys= mp.keySet(results)
+
+    #Ordena los partidos, penalties de cada uno de los años
+    for key in lt.iterator(s_keys):
+        k_v= mp.get(shootouts, key)
+        shootout_list = me.getValue(k_v)
+        merg.sort(shootout_list, shootouts_sort_criteria)
+        mp.put(shootouts,key, shootout_list)
+    
+    for key in lt.iterator(r_keys):
+        k_v= mp.get(results, key)
+        results_list = me.getValue(k_v)
+        merg.sort(results_list, results_sort_criteria)
+        mp.put(results,key, results_list)
+
+def sort_years_new_first(list):
+    merg.sort(list, years_new_first_criteria)
+    
+    
+
+    

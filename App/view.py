@@ -79,13 +79,21 @@ Ingrese 6 si quiere cargar el 50 porciento de los datos
 Ingrese 7 si quiere cargar el 80 porciento de los datos
 Ingrese 8 si quiere cargar TODOS los datos."""
     data_size = int(input(message))
-    scorers = controller.load_data(control, data_size)
-    return scorers
+    scorers, results, shootouts, n_results, n_shootouts = controller.load_data(control, data_size)
+    return scorers, results, shootouts, n_results, n_shootouts
 
 def print_loaded_data(control):
-    scorers = load_data(control)
+    scorers, results, shootouts, n_results, n_shootouts = load_data(control)
+    print(f'{"-"*10}\n'
+            f'Numero de partidos: {n_results}\n'
+            f'Numero de penalties: {n_shootouts}\n'
+        f'{"-"*10}\n')
     print(f'Jugadores encontrados')
     print(f'{tabulate(scorers,headers="keys",tablefmt="grid")}')
+    print(f'\nResultados de partidos cargados: {n_results}')
+    print(f'{tabulate(results,headers="keys",tablefmt="grid")}')
+    print(f'\nResultados de penalties cargados: {n_shootouts}')
+    print(f'{tabulate(shootouts,headers="keys",tablefmt="grid")}')
 
 def print_data(control, id):
     """
