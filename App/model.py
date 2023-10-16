@@ -190,6 +190,13 @@ def first_last_three_elems(data_struct, keys,n_elements):
                 i-=1
             last_key-=1
     return return_list
+
+def keys_to_array(data_struct):
+    array_list = lt.newList("ARRAY_LIST")
+    keys= mp.keySet(data_struct)
+    for key in lt.iterator(keys):
+        lt.addLast(array_list, key)
+    return array_list
 # Funciones de consulta
 
 def get_data(data_structs, id):

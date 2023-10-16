@@ -78,28 +78,20 @@ def load_data(control, data_size):
             return_scorers.append(elem)
 
     #Listas donde se guardarán los años presentes en el archivo de partidos y penalties.
-    r_years= lt.newList('ARRAY_LIST')
-    s_years = lt.newList('ARRAY_LIST')  
+    r_years= model.keys_to_array(results)
+    s_years = model.keys_to_array(shootouts)
 
-    r_keys= mp.keySet(results)
-    for key in lt.iterator(r_keys):
-        lt.addLast(r_years, key)
-    
-    s_keys=mp.keySet(shootouts)
-    for key in lt.iterator(s_keys):
-        lt.addLast(s_years, key)
-    
     #Ordena los años de más reciente a más antiguo
     model.sort_years_new_first(r_years)
     model.sort_years_new_first(s_years)
 
     #Mira el número de partidos y penalties
-    n_results= model.n_elements(results, r_keys)
-    n_shootouts=model.n_elements(shootouts, s_keys)
+    n_results= model.n_elements(results, r_years)
+    n_shootouts=model.n_elements(shootouts, s_years)
     
     #Retorna 3 primeros y 3 últimos elementos
-    return_results=model.first_last_three_elems(results, r_keys, n_results)
-    return_shootouts=model.first_last_three_elems(shootouts, s_keys, n_shootouts)
+    return_results=model.first_last_three_elems(results, r_years, n_results)
+    return_shootouts=model.first_last_three_elems(shootouts, s_years, n_shootouts)
 
 
 
