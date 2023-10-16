@@ -135,7 +135,61 @@ def add_shootout(data_structs, data):
         lt.addLast(value, data)
         mp.put(data_structs, anio, value)
 
+def n_elements(data_struct, keys):
+    number = 0
+    for key in lt.iterator(keys):
+        k_v=mp.get(data_struct, key)
+        value = me.getValue(k_v)
+        number+=lt.size(value)
+    return number
 
+def first_last_three_elems(data_struct, keys,n_elements):
+    #Devuelve los 3 primeros y 3 últimos elementos en un mapa
+    #Data_struct es un mapa
+    #Keys es una lista ORDENADA de las llaves de data_struct
+    #n_elements es el número total de elementos dentro del mapa. Contando los elementos dentro de una llave.
+    #Por ejemplo, si las llaves son años, y se guardan todos los partidos de un año dado en una lista, 
+    #n_elements sería el número de partidos
+
+    #Mira si hay más de 6 partidos
+    return_list = []
+    if n_elements<=6:
+        for key in lt.iterator(keys):
+            k_v = mp.get(data_struct, key)
+            value = me.getValue(k_v)
+            for v in lt.iterator(value):
+                return_list.append(v)
+    else:
+        first_key = 1
+        first_results = 1
+        last_results = 1
+        last_key = lt.size(keys)
+        
+        #Añade 3 primeros resultados
+        while first_results<=3:
+            i=1
+            key = lt.getElement(keys, first_key)
+            k_v=mp.get(data_struct, key)
+            value = me.getValue(k_v)
+            while i<=lt.size(value) and first_results<=3:
+                elem = lt.getElement(value, i)
+                return_list.append(elem)
+                first_results+=1
+                i+=1
+            first_key+=1
+        #Añade últimos 3 resultados
+        while last_results<=3:
+            key = lt.getElement(keys, last_key)
+            k_v=mp.get(data_struct, key)
+            value = me.getValue(k_v)
+            i=lt.size(value)
+            while i>0 and last_results<=3:
+                elem = lt.getElement(value, i)
+                return_list.append(elem)
+                last_results+=1
+                i-=1
+            last_key-=1
+    return return_list
 # Funciones de consulta
 
 def get_data(data_structs, id):

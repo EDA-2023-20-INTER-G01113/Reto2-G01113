@@ -93,97 +93,15 @@ def load_data(control, data_size):
     model.sort_years_new_first(r_years)
     model.sort_years_new_first(s_years)
 
-    #Mira el número de partidos
-    n_results= 0
-    for year in lt.iterator(r_keys):
-        k_v=mp.get(results, year)
-        value = me.getValue(k_v)
-        n_results+=lt.size(value)
+    #Mira el número de partidos y penalties
+    n_results= model.n_elements(results, r_keys)
+    n_shootouts=model.n_elements(shootouts, s_keys)
     
-    #Mira si hay más de 6 partidos
-    if n_results<=6:
-        for year in lt.iterator(r_keys):
-            k_v = mp.get(results, year)
-            value = me.getValue(k_v)
-            for v in lt.iterator(value):
-                return_results.append(v)
-    else:
-        first_year = 1
-        first_results = 1
-        last_results = 1
-        last_year = lt.size(r_years)
-        
-        #Añade 3 primeros resultados
-        while first_results<=3:
-            i=1
-            year = lt.getElement(r_years, first_year)
-            k_v=mp.get(results, year)
-            value = me.getValue(k_v)
-            while i<=lt.size(value) and first_results<=3:
-                elem = lt.getElement(value, i)
-                return_results.append(elem)
-                first_results+=1
-                i+=1
-            first_year+=1
-        
-        #Añade últimos 3 resultados
-        while last_results<=3:
-            year = lt.getElement(r_years, last_year)
-            k_v=mp.get(results, year)
-            value = me.getValue(k_v)
-            i=lt.size(value)
-            while i>0 and last_results<=3:
-                elem = lt.getElement(value, i)
-                return_results.append(elem)
-                last_results+=1
-                i-=1
-            last_year-=1
+    #Retorna 3 primeros y 3 últimos elementos
+    return_results=model.first_last_three_elems(results, r_keys, n_results)
+    return_shootouts=model.first_last_three_elems(shootouts, s_keys, n_shootouts)
 
-    #Cuenta el número de penalties
-    n_shootouts= 0
-    for year in lt.iterator(s_keys):
-        k_v=mp.get(shootouts, year)
-        value = me.getValue(k_v)
-        n_shootouts+=lt.size(value)
 
-    #Verifica si hay más de 6 penalties
-    if n_shootouts<=6:
-        for year in lt.iterator(s_keys):
-            k_v = mp.get(shootouts, year)
-            value = me.getValue(k_v)
-            for v in lt.iterator(value):
-                return_shootouts.append(v)
-    else:
-        first_year = 1
-        first_results = 1
-        last_results = 1
-        last_year = lt.size(s_years)
-        
-        #Añade 3 primeros resultados
-        while first_results<=3:
-            i=1
-            year = lt.getElement(s_years, first_year)
-            k_v=mp.get(shootouts, year)
-            value = me.getValue(k_v)
-            while i<=lt.size(value) and first_results<=3:
-                elem = lt.getElement(value, i)
-                return_shootouts.append(elem)
-                first_results+=1
-                i+=1
-            first_year+=1
-        
-        #Añade últimos 3 resultados
-        while last_results<=3:
-            year = lt.getElement(s_years, last_year)
-            k_v=mp.get(shootouts, year)
-            value = me.getValue(k_v)
-            i=lt.size(value)
-            while i>0 and last_results<=3:
-                elem = lt.getElement(value, i)
-                return_shootouts.append(elem)
-                last_results+=1
-                i-=1
-            last_year-=1
 
     return return_scorers, return_results, return_shootouts, n_results, n_shootouts
     
