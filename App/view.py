@@ -61,6 +61,7 @@ def print_menu():
     print("7- Ejecutar Requerimiento 6")
     print("8- Ejecutar Requerimiento 7")
     print("9- Ejecutar Requerimiento 8")
+    print("10- Ejecutar carga de datos lab 7 (EJECUTAR 1 ANTES)")
     print("0- Salir")
 
 
@@ -79,17 +80,17 @@ Ingrese 6 si quiere cargar el 50 porciento de los datos
 Ingrese 7 si quiere cargar el 80 porciento de los datos
 Ingrese 8 si quiere cargar TODOS los datos."""
     data_size = int(input(message))
-    scorers, results, shootouts, n_results, n_shootouts = controller.load_data(control, data_size)
-    return scorers, results, shootouts, n_results, n_shootouts
+    scorers, results, shootouts, n_results, n_shootouts, n_scores = controller.load_data(control, data_size)
+    return scorers, results, shootouts, n_results, n_shootouts, n_scores
 
 def print_loaded_data(control):
-    scorers, results, shootouts, n_results, n_shootouts = load_data(control)
+    scores, results, shootouts, n_results, n_shootouts, n_scores = load_data(control)
     print(f'{"-"*10}\n'
             f'Numero de partidos: {n_results}\n'
             f'Numero de penalties: {n_shootouts}\n'
         f'{"-"*10}\n')
-    print(f'Jugadores encontrados')
-    print(f'{tabulate(scorers,headers="keys",tablefmt="grid")}')
+    print(f'Goles encontrados: {n_scores}')
+    print(f'{tabulate(scores,headers="keys",tablefmt="grid")}')
     print(f'\nResultados de partidos cargados: {n_results}')
     print(f'{tabulate(results,headers="keys",tablefmt="grid")}')
     print(f'\nResultados de penalties cargados: {n_shootouts}')
@@ -165,6 +166,26 @@ def print_req_8(control):
     # TODO: Imprimir el resultado del requerimiento 8
     pass
 
+def print_lab_7(control):
+    maptype=input("Ingrese si quiere un mapa PROBING o CHAINING (P/C): ")
+    if maptype=="P":
+        maptype="PROBING"
+    elif maptype=="C":
+        maptype="CHAINING"
+    load_factor= float(input("Ingrese el factor de carga: "))
+    memflag = input("¿Desea que se devuelva registro de la memoria? (T/F): ")
+    if "T" in memflag:
+        memflag=True
+    else:
+        memflag = False
+    scorers, delta_time, delta_memory = controller.load_data_lab7(control, maptype, load_factor, memflag)
+    if scorers:
+        print(f'Tiempo de ejecución[ms]: {delta_time:.3f}')
+        if delta_memory:
+            print(f'Memoria empleada en la ejecución[kB]: {delta_memory:.3f}')
+        print(f'Jugadores encontrados:')
+        print(f'{tabulate(scorers,headers="keys",tablefmt="grid")}')
+
 
 # Se crea el controlador asociado a la vista
 control = new_controller()
@@ -206,6 +227,8 @@ if __name__ == "__main__":
         elif int(inputs) == 9:
             print_req_8(control)
 
+        elif int(inputs)==10:
+            print_lab_7(control)
         elif int(inputs) == 0:
             working = False
             print("\nGracias por utilizar el programa")

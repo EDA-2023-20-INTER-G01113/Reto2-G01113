@@ -68,7 +68,12 @@ def new_data_structs():
     
     return n_d
 
-
+def scorers_lab7(data_structs, maptype, loadfactor):
+    data_structs['scorers_lab']=mp.newMap(42000,
+                                          maptype=maptype,
+                                          loadfactor=loadfactor,
+                                          cmpfunction=compare_scorers)
+    return data_structs
 
 # Funciones para agregar informacion al modelo
 
@@ -78,7 +83,7 @@ def addData(data_structs, data, llave):
     """
     #TODO: Crear la función para agregar elementos a una lista
     if llave == "goal_scorers":
-        add_scorer(data_structs[llave], data)
+        add_score(data_structs[llave], data)
     elif llave == "results":
         add_result(data_structs[llave],data)
     elif llave == "shootouts":
@@ -102,24 +107,6 @@ def add_result(data_structs, data):
         lt.addLast(value, data)
         mp.put(data_structs, anio, value)
 
-def add_scorer(data_structs, data):
-    scorer= data["scorer"]
-    #Revisa que el campo de scorer y minuto no estén vacios
-    if scorer and data['minute']:
-        if not mp.contains(data_structs, scorer):
-            elem = {'scorer':scorer,'goals':1,'avg_time':float(data['minute'])}
-            #El elemento abajo contiene información de las anotaciones del jugador. Por ahora, se probará con el tiempo promedio y el número de goles
-            #elem = {'scorer':scorer,'goals':1,'scores':lt.newList('ARRAY_LIST',compare_scorers),'avg_time':float(data['minute'])}
-            #lt.addLast(elem['scores'],data)
-            mp.put(data_structs, scorer, elem)
-        else:
-            k_v = mp.get(data_structs,scorer)
-            scorer_info = me.getValue(k_v)
-            scorer_info['goals']+=1
-            #lt.addLast(scorer_info['scores'], data)
-            #Usa una fórmula para calcular el nuevo promedio
-            scorer_info['avg_time']= ((scorer_info['avg_time']*(scorer_info['goals']-1))+float(data['minute']))/scorer_info['goals']
-            mp.put(data_structs, scorer, scorer_info)
 
 def add_shootout(data_structs, data):
     data_date = date.fromisoformat(data["date"])
@@ -135,6 +122,57 @@ def add_shootout(data_structs, data):
         lt.addLast(value, data)
         mp.put(data_structs, anio, value)
 
+def add_score(data_structs, data):
+    data_date = date.fromisoformat(data["date"])
+    anio = data_date.year
+    
+    if not mp.contains(data_structs, anio):
+        elem = lt.newList("ARRAY_LIST", cmpfunction=compare_shootouts_list)
+        lt.addLast(elem,data)
+        mp.put(data_structs, anio, elem)
+    else:
+        k_v = mp.get(data_structs,anio)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+        mp.put(data_structs, anio, value)
+
+def add_scorer(data_structs):
+    keys = keys_to_array(data_structs['goal_scorers'])
+    for key in lt.iterator(keys):
+        k_v = mp.get(data_structs['goal_scorers'],key)
+        values = me.getValue(k_v)
+        for data in lt.iterator(values):
+            scorer= data["scorer"]
+            #Revisa que el campo de scorer y minuto no estén vacios
+            if scorer and data['minute']:
+                if not mp.contains(data_structs['scorers_lab'], scorer):
+                    elem = {'scorer':scorer,'goals':1,'avg_time':float(data['minute'])}
+                    #El elemento abajo contiene información de las anotaciones del jugador. Por ahora, se probará con el tiempo promedio y el número de goles
+                    #elem = {'scorer':scorer,'goals':1,'scores':lt.newList('ARRAY_LIST',compare_scorers),'avg_time':float(data['minute'])}
+                    #lt.addLast(elem['scores'],data)
+                    mp.put(data_structs['scorers_lab'], scorer, elem)
+                else:
+                    k_v1 = mp.get(data_structs['scorers_lab'],scorer)
+                    scorer_info = me.getValue(k_v1)
+                    scorer_info['goals']+=1
+                    #lt.addLast(scorer_info['scores'], data)
+                    #Usa una fórmula para calcular el nuevo promedio
+                    scorer_info['avg_time']= ((scorer_info['avg_time']*(scorer_info['goals']-1))+float(data['minute']))/scorer_info['goals']
+                    mp.put(data_structs['scorers_lab'], scorer, scorer_info)
+
+def elements_lab7(scorers_values, scorers_size):
+    #Se devolverá esta lista nativa de python para que tabulate pueda procesarla.
+    return_scorers=[]
+    #Mira si hay más de 6 elementos en la data structure con los jugadores.
+    if scorers_size>6:
+        for i in range(1,7):
+            elem = lt.getElement(scorers_values,i)
+            return_scorers.append(elem)
+    else:
+        for i in range(1,scorers_size+1):
+            elem = lt.getElement(scorers_values, i)
+            return_scorers.append(elem)
+    return return_scorers
 def n_elements(data_struct, keys):
     number = 0
     for key in lt.iterator(keys):
@@ -398,10 +436,11 @@ def sort(data_structs):
     #TODO: Crear función de ordenamiento
     shootouts= data_structs['shootouts']
     results= data_structs['results']
-    scorers= data_structs['goal_scorers']
+    scores= data_structs['goal_scorers']
 
     s_keys = mp.keySet(shootouts)
     r_keys= mp.keySet(results)
+    sc_keys = mp.keySet(scores)
 
     #Ordena los partidos, penalties de cada uno de los años
     for key in lt.iterator(s_keys):
@@ -411,6 +450,12 @@ def sort(data_structs):
         mp.put(shootouts,key, shootout_list)
     
     for key in lt.iterator(r_keys):
+        k_v= mp.get(results, key)
+        results_list = me.getValue(k_v)
+        merg.sort(results_list, results_sort_criteria)
+        mp.put(results,key, results_list)
+    
+    for key in lt.iterator(sc_keys):
         k_v= mp.get(results, key)
         results_list = me.getValue(k_v)
         merg.sort(results_list, results_sort_criteria)
