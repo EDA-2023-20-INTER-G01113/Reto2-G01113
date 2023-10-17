@@ -85,8 +85,8 @@ def addData(data_structs, data):
         lt.addLast(value, data)  
 def agregar(data_home, data_away, data_juntos, data):
 
-    local = date.fromisoformat(data["home_team"])
-    visitante= date.fromisoformat(data["away_team"])
+    local = (data["home_team"])
+    visitante= (data["away_team"])
     
     if not mp.contains(data_home,local ):
         elem = lt.newList("ARRAY_LIST")
