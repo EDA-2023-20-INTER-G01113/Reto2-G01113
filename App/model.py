@@ -54,7 +54,8 @@ def new_data_structs(formato):
     #TODO: Inicializar las estructuras de datos
     n_d = {"goal_scorers": mp.newMap(formato),
            "results": mp.newMap(formato),
-           "shootouts": mp.newMap(formato)}
+           "shootouts": mp.newMap(formato),
+           "jugador_goles": mp.newMap(formato)}
 
     
     return n_d
@@ -80,20 +81,18 @@ def addData(data_structs, data):
         k_v = mp.get(data_structs,anio)
         value = me.getValue(k_v)
         lt.addLast(value, data)   
-"""""
-def adicionar(name, data):
+
+def adicionar_jugador_goles(data_structs, name, data):
     
-    jugador = data["scorer"]
-    
-    if not mp.contains(name,jugador):
+    if not mp.contains(data_structs["jugador_goles"],name):
         elem = lt.newList("ARRAY_LIST")
         lt.addLast(elem,data)
-        mp.put(name,jugador,elem)
+        mp.put(data_structs["jugador_goles"],name,elem)
     else:
-        k_v =mp.get(name,jugador)
+        k_v =mp.get(data_structs["jugador_goles"],name)
         value = me.getValue(k_v)
         lt.addLast(value,data)
-"""                        
+                        
         
 # Funciones de consulta
 
@@ -121,17 +120,17 @@ def req_1(data_structs):
     pass
 
 
-def req_2(data_structs, nombre):
+def req_2(data_structs, nombre, cant_goles):
     # TODO: Realizar el requerimiento 2
     
     lista = lt.newList("ARRAY_LIST") 
      
-    if mp.contains(data_structs["goal_scorers"], nombre):
-        est = mp.valueSet(data_structs["goal_scorers"])
-        for cada in lt.iterator(est):
-            if nombre == cada["scorer"]:
-                addData(lista,cada)
-            return lista
+    if mp.contains(data_structs["jugador_goles"], nombre):
+        goles_entry = mp.get(data_structs["jugador_goles"],nombre)
+        goles = me.getValue(goles_entry)
+        merg.sort(goles,cmp_crit_goal_req_2)
+        return lt.subList(goles, 1, cant_goles)
+        
     else:
         return "El jugador no existe"
 
@@ -213,16 +212,19 @@ def sort_criteria(data_1, data_2):
     #TODO: Crear función comparadora para ordenar
     pass
 
-def sort_crit_goal(data_1, data_2):
-     if float(data_1["date"].replace("-","")) < float(data_2["date"].replace("-","")):
-        return True
-     elif float(data_1["date"].replace("-","")) == float(data_2["date"].replace("-","")):
-        if (data_1["minute"]) < (data_2["minute"]):
+def cmp_crit_goal_req_2(data_1, data_2):
+    date_1 = date.fromisoformat(data_1["date"])
+    date_2 = date.fromisoformat(data_2["date"])
+    
+    mn_1 = float(data_1["minute"])
+    mn_2 = float(data_2["minute"])
+    
+    if date_1 > date_2:
+        if mn_1 > mn_2:
             return True
-        else:
-            return False
-     else:
         return False
+    return False
+
 
 
 def sort(data_structs):

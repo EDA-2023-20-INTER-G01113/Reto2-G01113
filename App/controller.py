@@ -65,6 +65,8 @@ def load_data(control, filegoalscorers, fileresults, fileshootouts):
             
             model.addData(control[llave], dato)
     
+    load_jugador_goles(control["goal_scorers"], filegoalscorers)
+    
         
     
 def load_goal_scorers(n_d, filename):
@@ -73,8 +75,21 @@ def load_goal_scorers(n_d, filename):
     
     for goals in input_file:
         model.addData(n_d, goals)
+        
     
     return model.dataSize(n_d)
+
+def load_jugador_goles(n_d, filename):
+    
+    goals_file = cf.data_dir  +filename
+    input_file = csv.DictReader(open(goals_file, encoding='utf-8'))
+    
+    for goals in input_file:
+        model.adicionar_jugador_goles(n_d["model"], goals["scorer"],goals)
+        
+    
+    
+    
 
 
         
@@ -124,13 +139,23 @@ def req_1(control):
     pass
 
 
-def req_2(control):
+def req_2(control, nombre, cant_goles):
     """
     Retorna el resultado del requerimiento 2
     """
-    
-    
+    goles = model.req_2(control["model"], nombre, cant_goles)
+    respuesta = lt.newList("ARRAY_LIST")
 
+    if lt.size (goles) > 6:
+        primeros_tres = lt.subList(goles, 0 , 3)
+        ultimos_tres = lt.subList(goles, lt.size(goles) - 3, 3)
+        for cada in lt.iterator(primeros_tres):
+            lt.addLast(respuesta, cada)
+        for cada in lt.iterator(ultimos_tres):
+            lt.addLast(respuesta, cada)
+                
+    return respuesta 
+    
 
 def req_3(control):
     """

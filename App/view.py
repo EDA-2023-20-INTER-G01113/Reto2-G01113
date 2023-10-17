@@ -29,7 +29,7 @@ from DISClib.ADT import queue as qu
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 assert cf
-from tabulate import tabulate
+#from tabulate import tabulate
 import traceback
 
 """
@@ -85,12 +85,13 @@ def print_req_1(control):
     pass
 
 
-def print_req_2(control):
+def print_req_2(control, nombre, cant_goles):
     """
         Función que imprime la solución del Requerimiento 2 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 2
-    pass
+    print(controller.req_2(control, nombre, cant_goles))
+
 
 
 def print_req_3(control):
@@ -161,7 +162,9 @@ if __name__ == "__main__":
             print_req_1(control)
 
         elif int(inputs) == 3:
-            print_req_2(control)
+            nombre = input("Ingrese el nombre del jugador: ")
+            cant_goles = input("Ingrese la cantidad de goles que desea consultar: ")
+            print_req_2(control, nombre, cant_goles)
 
         elif int(inputs) == 4:
             print_req_3(control)
