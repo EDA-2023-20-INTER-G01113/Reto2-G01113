@@ -98,7 +98,6 @@ def addData(data_structs, data, llave):
           
 
 def add_result(data_structs, data, data_team):
-    addMatchResultByTeam(data_team,data)
     data_date = date.fromisoformat(data["date"])
     anio = data_date.year
     
