@@ -58,45 +58,60 @@ def load_data(control, data_size):
     model.sort(control['model'])
 
     results = control['model']['results']
-    scorers = control['model']['goal_scorers']
+    scores = control['model']['goal_scorers']
     shootouts= control['model']['shootouts']
-    scorers_size = mp.size(scorers)
-    scorers_values = mp.valueSet(scorers)
-
-    #Se devolverá esta lista nativa de python para que tabulate pueda procesarla.
-    return_scorers = []
-    return_results= []
-    return_shootouts=[]
-    #Mira si hay más de 6 elementos en la data structure con los jugadores.
-    if scorers_size>6:
-        for i in range(1,7):
-            elem = lt.getElement(scorers_values,i)
-            return_scorers.append(elem)
-    else:
-        for i in range(1,scorers_size+1):
-            elem = lt.getElement(scorers_values, i)
-            return_scorers.append(elem)
+    
 
     #Listas donde se guardarán los años presentes en el archivo de partidos y penalties.
     r_years= model.keys_to_array(results)
     s_years = model.keys_to_array(shootouts)
+    sc_years = model.keys_to_array(scores)
 
     #Ordena los años de más reciente a más antiguo
     model.sort_years_new_first(r_years)
     model.sort_years_new_first(s_years)
+    model.sort_years_new_first(sc_years)
 
     #Mira el número de partidos y penalties
     n_results= model.n_elements(results, r_years)
     n_shootouts=model.n_elements(shootouts, s_years)
+    n_scores=model.n_elements(scores, sc_years)
     
     #Retorna 3 primeros y 3 últimos elementos
     return_results=model.first_last_three_elems(results, r_years, n_results)
     return_shootouts=model.first_last_three_elems(shootouts, s_years, n_shootouts)
+    return_scores = model.first_last_three_elems(scores, sc_years, n_scores)
 
 
 
-    return return_scorers, return_results, return_shootouts, n_results, n_shootouts
+    return return_scores, return_results, return_shootouts, n_results, n_shootouts, n_scores
     
+def load_data_lab7(control, maptype, loadfactor, memflag):
+        try: 
+            start_time = get_time()
+            if memflag:
+                tracemalloc.start()
+                start_memory = get_memory() 
+                
+            data_structs = model.scorers_lab7(control['model'], maptype, loadfactor)
+            model.add_scorer(data_structs)
+            scorers_size = mp.size(data_structs["scorers_lab"])
+            scorers_values = mp.valueSet(data_structs["scorers_lab"])
+            #Devuelve 6 elementos en caso de que haya más de ello
+            return_scorers= model.elements_lab7(scorers_values, scorers_size)
+
+            stop_time = get_time()
+            delta_t = delta_time(start_time, stop_time)
+
+            if memflag:
+                stop_memory = get_memory()
+                tracemalloc.stop()
+                delta_m = delta_memory(stop_memory, start_memory)
+                return return_scorers, delta_t, delta_m
+            return return_scorers, delta_t, []
+        except:
+            print("Antes de ejecutar la carga de datos del laboratorio 7, asegúrate de primero ejecutar la función 1 (carga de datos)")
+            
 
 def load_data_mask(control, filegoalscorers, fileresults, fileshootouts):
     """
