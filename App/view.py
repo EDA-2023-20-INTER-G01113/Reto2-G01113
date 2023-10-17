@@ -45,7 +45,7 @@ def new_controller():
         Se crea una instancia del controlador
     """
     #TODO: Llamar la función del controlador donde se crean las estructuras de datos
-    pass
+    
 
 
 def print_menu():
@@ -91,7 +91,6 @@ def print_req_2(control, nombre, cant_goles):
     """
     # TODO: Imprimir el resultado del requerimiento 2
     print(controller.req_2(control, nombre, cant_goles))
-
 
 
 def print_req_3(control):

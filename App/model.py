@@ -82,6 +82,7 @@ def addData(data_structs, data):
         value = me.getValue(k_v)
         lt.addLast(value, data)   
 
+
 def adicionar_jugador_goles(data_structs, name, data):
     
     if not mp.contains(data_structs["jugador_goles"],name):
@@ -155,10 +156,11 @@ def req_4(data_structs):
     pass
 
 
-def req_5(data_structs):
+def req_5(data_structs, nombre, fecha_inicio, fecha_final):
     """
     Función que soluciona el requerimiento 5
     """
+    
     # TODO: Realizar el requerimiento 5
     pass
 

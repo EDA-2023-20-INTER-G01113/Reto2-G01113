@@ -87,11 +87,7 @@ def load_jugador_goles(n_d, filename):
     for goals in input_file:
         model.adicionar_jugador_goles(n_d["model"], goals["scorer"],goals)
         
-    
-    
-    
-
-
+        
         
 def load_results(n_d, filename):
     resultsfile = cf.data_dir + filename
