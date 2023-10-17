@@ -79,7 +79,21 @@ def addData(data_structs, data):
     else:
         k_v = mp.get(data_structs,anio)
         value = me.getValue(k_v)
-        lt.addLast(value, data)       
+        lt.addLast(value, data)   
+"""""
+def adicionar(name, data):
+    
+    jugador = data["scorer"]
+    
+    if not mp.contains(name,jugador):
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
+        mp.put(name,jugador,elem)
+    else:
+        k_v =mp.get(name,jugador)
+        value = me.getValue(k_v)
+        lt.addLast(value,data)
+"""                        
         
 # Funciones de consulta
 
@@ -107,12 +121,23 @@ def req_1(data_structs):
     pass
 
 
-def req_2(data_structs):
-    """
-    Función que soluciona el requerimiento 2
-    """
+def req_2(data_structs, nombre):
     # TODO: Realizar el requerimiento 2
-    pass
+    
+    lista = lt.newList("ARRAY_LIST") 
+     
+    if mp.contains(data_structs["goal_scorers"], nombre):
+        est = mp.valueSet(data_structs["goal_scorers"])
+        for cada in lt.iterator(est):
+            if nombre == cada["scorer"]:
+                addData(lista,cada)
+            return lista
+    else:
+        return "El jugador no existe"
+
+    
+         
+    
 
 
 def req_3(data_structs):
@@ -187,6 +212,17 @@ def sort_criteria(data_1, data_2):
     """
     #TODO: Crear función comparadora para ordenar
     pass
+
+def sort_crit_goal(data_1, data_2):
+     if float(data_1["date"].replace("-","")) < float(data_2["date"].replace("-","")):
+        return True
+     elif float(data_1["date"].replace("-","")) == float(data_2["date"].replace("-","")):
+        if (data_1["minute"]) < (data_2["minute"]):
+            return True
+        else:
+            return False
+     else:
+        return False
 
 
 def sort(data_structs):

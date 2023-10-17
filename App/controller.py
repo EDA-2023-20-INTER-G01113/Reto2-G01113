@@ -104,6 +104,8 @@ def sort(control):
     pass
 
 
+
+
 # Funciones de consulta sobre el catálogo
 
 def get_data(control, id):
@@ -126,8 +128,8 @@ def req_2(control):
     """
     Retorna el resultado del requerimiento 2
     """
-    # TODO: Modificar el requerimiento 2
-    pass
+    
+    
 
 
 def req_3(control):
