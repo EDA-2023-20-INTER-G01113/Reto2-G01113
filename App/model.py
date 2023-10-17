@@ -63,6 +63,10 @@ def new_data_structs():
            "shootouts": mp.newMap(1000, 
                                   maptype="PROBING",
                                   loadfactor=0.5,
+                                  cmpfunction=compare_shootouts),
+            "MatchResults":mp.newMap(1000, 
+                                  maptype="PROBING",
+                                  loadfactor=0.5,
                                   cmpfunction=compare_shootouts)}
 
     
@@ -80,7 +84,7 @@ def addData(data_structs, data, llave):
     if llave == "goal_scorers":
         add_scorer(data_structs[llave], data)
     elif llave == "results":
-        add_result(data_structs[llave],data)
+        add_result(data_structs[llave],data,data_structs["MatchResults"])
     elif llave == "shootouts":
         add_shootout(data_structs[llave], data)
     
@@ -88,7 +92,8 @@ def addData(data_structs, data, llave):
     
           
 
-def add_result(data_structs, data):
+def add_result(data_structs, data, data_team):
+    addMatchResultByTeam(data_team,data)
     data_date = date.fromisoformat(data["date"])
     anio = data_date.year
     
