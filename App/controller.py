@@ -61,6 +61,7 @@ def load_data(control, data_size):
     scores = control['model']['goal_scorers']
     shootouts= control['model']['shootouts']
     
+    
 
     #Listas donde se guardarán los años presentes en el archivo de partidos y penalties.
     r_years= model.keys_to_array(results)
@@ -82,7 +83,9 @@ def load_data(control, data_size):
     return_shootouts=model.first_last_three_elems(shootouts, s_years, n_shootouts)
     return_scores = model.first_last_three_elems(scores, sc_years, n_scores)
 
-
+    
+    load_jugador_goles(control["model"], filegoalscorers)
+    
 
     return return_scores, return_results, return_shootouts, n_results, n_shootouts, n_scores
     
@@ -136,7 +139,13 @@ def load_data_mask(control, filegoalscorers, fileresults, fileshootouts):
             model.addData(control, dato, llave)
     
         
+def load_jugador_goles(n_d, filename):
+    goals_file = cf.data_dir  +filename
+    input_file = csv.DictReader(open(goals_file, encoding='utf-8'))
     
+    for goals in input_file:
+        model.adicionar_jugador_goles(n_d, goals["scorer"],goals)
+            
 def load_goal_scorers(data_size):
     if data_size==1:
      scores_file =  'goalscorers-utf8-small.csv'
@@ -248,12 +257,26 @@ def req_1(control):
     pass
 
 
-def req_2(control):
+def req_2(control, nombre,cant_goles):
     """
     Retorna el resultado del requerimiento 2
     """
-    # TODO: Modificar el requerimiento 2
-    pass
+    goles = model.req_2(control["model"], nombre, cant_goles)
+    if goles=="El jugador no existe":
+        return goles
+    respuesta = lt.newList("ARRAY_LIST")
+
+    if lt.size(goles) > 6:
+        primeros_tres = lt.subList(goles, 1 , 3)
+        ultimos_tres = lt.subList(goles, lt.size(goles) - 3, lt.size(goles))
+        for cada in lt.iterator(primeros_tres):
+            lt.addLast(respuesta, cada)
+        for cada in lt.iterator(ultimos_tres):
+            lt.addLast(respuesta, cada)
+    else:
+        respuesta=goles
+                
+    return respuesta 
 
 
 def req_3(control):

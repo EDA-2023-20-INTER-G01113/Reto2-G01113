@@ -67,7 +67,11 @@ def new_data_structs():
             "MatchResults":mp.newMap(1000, 
                                   maptype="PROBING",
                                   loadfactor=0.5,
-                                  cmpfunction=compare_shootouts)}
+                                  cmpfunction=compare_shootouts),
+            "jugador_goles": mp.newMap(1000,
+                                       maptype="PROBING",
+                                       loadfactor= 0.5,
+                                       cmpfunction= cmp_req_2_final)}
 
     
     return n_d
@@ -239,6 +243,20 @@ def keys_to_array(data_struct):
     for key in lt.iterator(keys):
         lt.addLast(array_list, key)
     return array_list
+
+
+def adicionar_jugador_goles(data_structs, name, data):
+    
+    if not mp.contains(data_structs["jugador_goles"],name):
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
+        mp.put(data_structs["jugador_goles"],name,elem)
+    else:
+        k_v =mp.get(data_structs["jugador_goles"],name)
+        value = me.getValue(k_v)
+        lt.addLast(value,data)
+        mp.put(data_structs["jugador_goles"],name, value)
+        
 # Funciones de consulta
 
 def get_data(data_structs, id):
@@ -264,13 +282,22 @@ def req_1(data_structs):
     # TODO: Realizar el requerimiento 1
     pass
 
-
-def req_2(data_structs):
+def req_2(data_structs, nombre, cant_goles):
     """
     Función que soluciona el requerimiento 2
     """
     # TODO: Realizar el requerimiento 2
-    pass
+     
+    if mp.contains(data_structs["jugador_goles"], nombre):
+        goles_entry = mp.get(data_structs["jugador_goles"],nombre)
+        goles = me.getValue(goles_entry)
+        merg.sort(goles,cmp_crit_goal_req_2)
+        if lt.size(goles) >= cant_goles:
+            return lt.subList(goles, 1, cant_goles)
+        else: 
+            return goles
+    else:
+        return "El jugador no existe"
 
 
 def req_3(data_structs):
@@ -389,7 +416,15 @@ def compare_results(keyname, year):
         return 1
     else:
         return -1
-
+    
+def cmp_req_2_final(key_name, jugador_goles_entrada):
+    nombre_entrada = me.getKey(jugador_goles_entrada)
+    if key_name == nombre_entrada:
+        return 0
+    elif key_name > nombre_entrada:
+        return 1
+    else:
+        -1
 def compare_results_list(data1, data2):
     date1 = date.fromisoformat(data1['date'])
     date2= date.fromisoformat(data2['date'])
@@ -430,6 +465,20 @@ def years_new_first_criteria(data1, data2):
     if data1>data2:
         return True
     return False
+
+def cmp_crit_goal_req_2(data_1, data_2):
+    date_1 = date.fromisoformat(data_1["date"])
+    date_2 = date.fromisoformat(data_2["date"])
+    
+    mn_1 = float(data_1["minute"])
+    mn_2 = float(data_2["minute"])
+    
+    if date_1 > date_2:
+        if mn_1 > mn_2:
+            return True
+        return False
+    return False
+
 # Funciones de ordenamiento
 
 
