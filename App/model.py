@@ -550,7 +550,7 @@ def sort(data_structs):
 
 def sort_dates_new_first(list):
     merg.sort(list, dates_new_first_criteria)
-    
+   
     
 
     
