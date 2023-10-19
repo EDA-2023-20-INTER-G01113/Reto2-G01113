@@ -64,7 +64,7 @@ def new_data_structs():
                                   maptype="PROBING",
                                   loadfactor=0.5,
                                   cmpfunction=compare_elements),
-            "MatchResults":mp.newMap(1000, 
+            "teams":mp.newMap(1000, 
                                   maptype="PROBING",
                                   loadfactor=0.5,
                                   cmpfunction=compare_elements),
@@ -94,15 +94,89 @@ def addData(data_structs, data, llave):
           
 
 def add_element(data_structs, data):
+    #TODO xime 
     data_date = date.fromisoformat(data["date"])
+    """
     if not mp.contains(data_structs, data_date):
         elem = lt.newList("ARRAY_LIST", cmpfunction=compare_elements)
+    addMatchResultsByTeam(data_team,data)
+    """
+    if not mp.contains(data_structs, data_date):
+        elem = lt.newList("ARRAY_LIST", compare_elements)
         lt.addLast(elem,data)
         mp.put(data_structs, data_date, elem)
     else:
         k_v = mp.get(data_structs,data_date)
         value = me.getValue(k_v)
         lt.addLast(value, data)
+        mp.put(data_structs, data_date, value)
+def addMatchResultsByTeam(data_team,matchResult):
+    teamMap= data_team["teams"]
+    teamNameA=matchResult['home_team']
+    entry= mp.get(teamMap,teamNameA)
+    if entry:
+        team= me.getValue(entry)
+    else:
+        team= newTeam()
+        mp.put(teamMap, teamNameA, team)
+    lt.addLast(team["MatchResults"],matchResult)
+    addMatchResultByCondition(team, matchResult,teamNameA)
+    teamNameB=matchResult['away_team']
+    entrys= mp.get(teamMap,teamNameB)
+    if entrys:
+        team= me.getValue(entrys)
+    else:
+        team= newTeam()
+        mp.put(teamMap, teamNameB, team)
+    lt.addLast(team["MatchResults"],matchResult)
+    addMatchResultByCondition(team, matchResult,teamNameB)
+
+def addMatchResultByCondition(nodo, matchResult, team):
+    conditionMap= nodo["matchResultsByCondition"]
+    condition="away"
+    if matchResult["home_team"]==team:
+        condition="home"
+    entry= mp.get(conditionMap, condition)
+    if entry:
+        conditionList= me.getValue(entry)
+    else:
+        conditionList= lt.newList("ARRAY_LIST")
+        mp.put(conditionMap,condition, conditionList)
+    lt.addLast(conditionList,matchResult)
+
+def newTeam():
+    team={}
+    team["MatchResults"]=lt.newList("ARRAY_LIST")
+    team["matchResultsByCondition"]=mp.newMap(2,maptype="PROBING")
+    return team
+
+def add_shootout(data_structs, data):
+    data_date = date.fromisoformat(data["date"])
+    anio = data_date.year
+    
+    if not mp.contains(data_structs, anio):
+        elem = lt.newList("ARRAY_LIST", cmpfunction=compare_shootouts_list)
+        lt.addLast(elem,data)
+        mp.put(data_structs, anio, elem)
+    else:
+        k_v = mp.get(data_structs,anio)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+        mp.put(data_structs, anio, value)
+
+def add_score(data_structs, data):
+    data_date = date.fromisoformat(data["date"])
+    anio = data_date.year
+    
+    if not mp.contains(data_structs, anio):
+        elem = lt.newList("ARRAY_LIST", cmpfunction=compare_shootouts_list)
+        lt.addLast(elem,data)
+        mp.put(data_structs, anio, elem)
+    else:
+        k_v = mp.get(data_structs,anio)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+        mp.put(data_structs, anio, value)
         mp.put(data_structs, data_date, value)
 
 
@@ -221,12 +295,20 @@ def adicionar_jugador_goles(data_structs, name, data):
         
 # Funciones de consulta
 
-def get_data(data_structs, id):
+def get_data_3(data_structs,tamano):
     """
     Retorna un dato a partir de su ID
     """
-    #TODO: Crear la función para obtener un dato de una lista
-    pass
+    #TODO: Crear la función para obtener un dato de una lista   
+    resultados = lt.newList("ARRAY_LIST")
+    lt.addFirst(resultados,lt.firstElement(data_structs))
+    for b in range(2,4):
+        p = lt.getElement(data_structs, b)
+        lt.addLast(resultados, p)
+    for b in range (0,3):
+        p = lt.getElement(data_structs, (tamano-2+b))
+        lt.addLast(resultados, p)
+    return resultados
 
 
 def data_size(data_structs):
@@ -237,13 +319,21 @@ def data_size(data_structs):
     pass
 
 
-def req_1(data_structs):
+def req_1(data_structs, team, condition):
     """
     Función que soluciona el requerimiento 1
     """
     # TODO: Realizar el requerimiento 1
-    pass
-
+    if condition!="MatchResults":
+        resultado= me.getValue(mp.get(me.getValue(mp.get(data_structs["model"]["teams"],team))["matchResultsByCondition"],condition))
+    else:
+        resultado= me.getValue(mp.get(data_structs["model"]["teams"],team))["MatchResults"]
+    if resultado:
+        total_teams= mp.size(data_structs["model"]["teams"])
+        total_partidos= lt.size(me.getValue(mp.get(data_structs["model"]["teams"],team))["MatchResults"])
+        return merg.sort(resultado,results_sort_criteria),total_teams,total_partidos
+    else:
+        return "El equipo no tiene partidos en esa condicion",0,0
 def req_2(data_structs, nombre, cant_goles):
     """
     Función que soluciona el requerimiento 2
@@ -382,7 +472,6 @@ def compare_results_list(data1, data2):
     elif date1==date2 and data1['home_team']==data2['home_team'] and data1['away_team']<data2['away_team']:
         return 1
     return -1
-
 def results_sort_criteria(data_1, data_2):
     """sortCriteria criterio de ordenamiento para las funciones de ordenamiento
 

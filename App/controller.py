@@ -240,20 +240,30 @@ def sort(control):
 
 # Funciones de consulta sobre el catálogo
 
-def get_data(control, id):
-    """
-    Retorna un dato por su ID.
-    """
-    #TODO: Llamar la función del modelo para obtener un dato
-    pass
 
 
-def req_1(control):
+
+def req_1(control,team, condition, numero):
     """
     Retorna el resultado del requerimiento 1
     """
     # TODO: Modificar el requerimiento 1
-    pass
+    if condition =="indiferent":
+        condition= "MatchResults"
+    resultados,total_teams,total_partidos= model.req_1(control,team,condition)
+    print(resultados)
+    if resultados!= "El equipo no tiene partidos en esa condicion":
+        Forcondition= lt.size(resultados)
+        resultado=resultados
+        if Forcondition>=numero:
+            resultado= lt.subList(resultados,1,numero)
+        tamano=lt.size(resultado)
+        if tamano> 6:
+            return model.get_data_3(resultado,tamano),total_teams,total_partidos,Forcondition
+        return resultado,total_teams,total_partidos,Forcondition
+    return resultados,0,0,0
+
+    
 
 
 def req_2(control, nombre,cant_goles):
