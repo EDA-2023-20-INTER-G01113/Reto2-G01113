@@ -93,6 +93,8 @@ def addData(data_structs, data, llave):
     add_element(data_structs[llave],data)
     if llave=="results":
         addMatchResultsByTeam(data_structs,data)
+    if llave=="goal_scorers":
+        adicionar_jugador_goles(data_structs, data['scorer'], data)
           
 
 def add_element(data_structs, data):

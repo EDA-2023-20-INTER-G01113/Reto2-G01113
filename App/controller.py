@@ -82,8 +82,7 @@ def load_data(control, data_size):
     return_shootouts=model.first_last_three_elems(shootouts, s_dates, n_shootouts)
     return_scores = model.first_last_three_elems(scores, sc_dates, n_scores)
 
-    
-    load_jugador_goles(control["model"], filegoalscorers)
+
     
 
     return return_scores, return_results, return_shootouts, n_results, n_shootouts, n_scores
@@ -136,14 +135,6 @@ def load_data_mask(control, filegoalscorers, fileresults, fileshootouts):
         for dato in input_file:
             
             model.addData(control, dato, llave)
-    
-        
-def load_jugador_goles(n_d, filename):
-    goals_file = cf.data_dir  +filename
-    input_file = csv.DictReader(open(goals_file, encoding='utf-8'))
-    
-    for goals in input_file:
-        model.adicionar_jugador_goles(n_d, goals["scorer"],goals)
             
 def load_goal_scorers(data_size):
     if data_size==1:
