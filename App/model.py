@@ -55,19 +55,19 @@ def new_data_structs():
     n_d = {"goal_scorers": mp.newMap(42000, 
                                      maptype="PROBING", 
                                      loadfactor=0.5,
-                                     cmpfunction=compare_scorers),
+                                     cmpfunction=compare_elements),
            "results": mp.newMap(45000, 
                                 maptype="PROBING",
                                 loadfactor=0.5,
-                                cmpfunction=compare_results),
+                                cmpfunction=compare_elements),
            "shootouts": mp.newMap(1000, 
                                   maptype="PROBING",
                                   loadfactor=0.5,
-                                  cmpfunction=compare_shootouts),
+                                  cmpfunction=compare_elements),
             "MatchResults":mp.newMap(1000, 
                                   maptype="PROBING",
                                   loadfactor=0.5,
-                                  cmpfunction=compare_shootouts),
+                                  cmpfunction=compare_elements),
             "jugador_goles": mp.newMap(1000,
                                        maptype="PROBING",
                                        loadfactor= 0.5,
@@ -80,7 +80,7 @@ def scorers_lab7(data_structs, maptype, loadfactor):
     data_structs['scorers_lab']=mp.newMap(42000,
                                           maptype=maptype,
                                           loadfactor=loadfactor,
-                                          cmpfunction=compare_scorers)
+                                          cmpfunction=compare_elements)
     return data_structs
 
 # Funciones para agregar informacion al modelo
@@ -90,59 +90,21 @@ def addData(data_structs, data, llave):
     Función para agregar nuevos elementos a la lista
     """
     #TODO: Crear la función para agregar elementos a una lista
-    if llave == "goal_scorers":
-        add_score(data_structs[llave], data)
-    elif llave == "results":
-        add_result(data_structs[llave],data,data_structs["MatchResults"])
-    elif llave == "shootouts":
-        add_shootout(data_structs[llave], data)
-    
-    
-    
+    add_element(data_structs[llave],data)
           
 
-def add_result(data_structs, data, data_team):
+def add_element(data_structs, data):
     data_date = date.fromisoformat(data["date"])
-    anio = data_date.year
-    
-    if not mp.contains(data_structs, anio):
-        elem = lt.newList("ARRAY_LIST", compare_results_list)
+    if not mp.contains(data_structs, data_date):
+        elem = lt.newList("ARRAY_LIST", cmpfunction=compare_elements)
         lt.addLast(elem,data)
-        mp.put(data_structs, anio, elem)
+        mp.put(data_structs, data_date, elem)
     else:
-        k_v = mp.get(data_structs,anio)
+        k_v = mp.get(data_structs,data_date)
         value = me.getValue(k_v)
         lt.addLast(value, data)
-        mp.put(data_structs, anio, value)
+        mp.put(data_structs, data_date, value)
 
-
-def add_shootout(data_structs, data):
-    data_date = date.fromisoformat(data["date"])
-    anio = data_date.year
-    
-    if not mp.contains(data_structs, anio):
-        elem = lt.newList("ARRAY_LIST", cmpfunction=compare_shootouts_list)
-        lt.addLast(elem,data)
-        mp.put(data_structs, anio, elem)
-    else:
-        k_v = mp.get(data_structs,anio)
-        value = me.getValue(k_v)
-        lt.addLast(value, data)
-        mp.put(data_structs, anio, value)
-
-def add_score(data_structs, data):
-    data_date = date.fromisoformat(data["date"])
-    anio = data_date.year
-    
-    if not mp.contains(data_structs, anio):
-        elem = lt.newList("ARRAY_LIST", cmpfunction=compare_shootouts_list)
-        lt.addLast(elem,data)
-        mp.put(data_structs, anio, elem)
-    else:
-        k_v = mp.get(data_structs,anio)
-        value = me.getValue(k_v)
-        lt.addLast(value, data)
-        mp.put(data_structs, anio, value)
 
 def add_scorer(data_structs):
     keys = keys_to_array(data_structs['goal_scorers'])
@@ -357,15 +319,6 @@ def compare(data_1, data_2):
     #TODO: Crear función comparadora de la lista
     pass
 
-def compare_scorers(keyname, scorer):
-    """Compara dos nombres de jugadores, el primero es una cadena y el segundo es un entry de un map"""
-    scorer_entry = me.getKey(scorer)
-    if keyname== scorer_entry:
-        return 0
-    elif keyname>scorer_entry:
-        return 1
-    else:
-        return -1
 
 def scorers_sort_criteria(data1, data2):
     if int(data1['goals'])>int(data2['goals']):
@@ -374,8 +327,8 @@ def scorers_sort_criteria(data1, data2):
         return True
     return False
 
-def compare_shootouts(keyname, shootout):
-    shootout_entry = me.getKey(shootout)
+def compare_elements(keyname, element):
+    shootout_entry = me.getKey(element)
     if keyname== shootout_entry:
         return 0
     elif keyname>shootout_entry:
@@ -408,14 +361,6 @@ def shootouts_sort_criteria(data_1, data_2):
         return True
     return False
 
-def compare_results(keyname, year):
-    year_entry = me.getKey(year)
-    if keyname==year_entry:
-        return 0
-    elif keyname>year_entry:
-        return 1
-    else:
-        return -1
     
 def cmp_req_2_final(key_name, jugador_goles_entrada):
     nombre_entrada = me.getKey(jugador_goles_entrada)
@@ -461,7 +406,7 @@ def results_sort_criteria(data_1, data_2):
         return True
     return False
 
-def years_new_first_criteria(data1, data2):
+def dates_new_first_criteria(data1, data2):
     if data1>data2:
         return True
     return False
@@ -514,8 +459,8 @@ def sort(data_structs):
         merg.sort(results_list, results_sort_criteria)
         mp.put(results,key, results_list)
 
-def sort_years_new_first(list):
-    merg.sort(list, years_new_first_criteria)
+def sort_dates_new_first(list):
+    merg.sort(list, dates_new_first_criteria)
     
     
 

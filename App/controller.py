@@ -61,27 +61,26 @@ def load_data(control, data_size):
     scores = control['model']['goal_scorers']
     shootouts= control['model']['shootouts']
     
-    
 
     #Listas donde se guardarán los años presentes en el archivo de partidos y penalties.
-    r_years= model.keys_to_array(results)
-    s_years = model.keys_to_array(shootouts)
-    sc_years = model.keys_to_array(scores)
+    r_dates= model.keys_to_array(results)
+    s_dates = model.keys_to_array(shootouts)
+    sc_dates = model.keys_to_array(scores)
 
     #Ordena los años de más reciente a más antiguo
-    model.sort_years_new_first(r_years)
-    model.sort_years_new_first(s_years)
-    model.sort_years_new_first(sc_years)
-
+    model.sort_dates_new_first(r_dates)
+    model.sort_dates_new_first(s_dates)
+    model.sort_dates_new_first(sc_dates)
+    
     #Mira el número de partidos y penalties
-    n_results= model.n_elements(results, r_years)
-    n_shootouts=model.n_elements(shootouts, s_years)
-    n_scores=model.n_elements(scores, sc_years)
+    n_results= model.n_elements(results, r_dates)
+    n_shootouts=model.n_elements(shootouts, s_dates)
+    n_scores=model.n_elements(scores, sc_dates)
     
     #Retorna 3 primeros y 3 últimos elementos
-    return_results=model.first_last_three_elems(results, r_years, n_results)
-    return_shootouts=model.first_last_three_elems(shootouts, s_years, n_shootouts)
-    return_scores = model.first_last_three_elems(scores, sc_years, n_scores)
+    return_results=model.first_last_three_elems(results, r_dates, n_results)
+    return_shootouts=model.first_last_three_elems(shootouts, s_dates, n_shootouts)
+    return_scores = model.first_last_three_elems(scores, sc_dates, n_scores)
 
     
     load_jugador_goles(control["model"], filegoalscorers)
