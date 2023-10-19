@@ -103,10 +103,15 @@ def print_data(control, id):
     #TODO: Realizar la función para imprimir un elemento
     
 
-def print_req_1(control):
+def print_req_1(control,team, condition,numero):
     """
         Función que imprime la solución del Requerimiento 1 en consola
     """
+    resultados, total_teams, total_partidos ,total_condition= controller.req_1(control,team,condition,numero)
+    print("Total teams with avalaible information: " + str(total_teams))
+    print("Total matches for "+ str(team) + ": "+ str(total_partidos))
+    print("Total matches for "+ str(team) + " as "+str(condition)+" : "+ str(total_condition))
+    print(resultados)
     # TODO: Imprimir el resultado del requerimiento 1
     pass
 
@@ -204,7 +209,10 @@ if __name__ == "__main__":
             print("Cargando información de los archivos ....\n")
             print_loaded_data(control)
         elif int(inputs) == 2:
-            print_req_1(control)
+            numero= int(input("Top N matches: \n"))
+            team= input("Team name: \n")
+            condition= input ("Team condition: \n")
+            print_req_1(control,team,condition,numero)
 
         elif int(inputs) == 3:
             nombre = input("Ingrese el nombre del jugador: ")
