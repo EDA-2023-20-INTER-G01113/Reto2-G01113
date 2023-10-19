@@ -99,7 +99,7 @@ def addData(data_structs, data, llave):
 
 def add_element(data_structs, data):
     #TODO xime 
-    data_date = date.fromisoformat(data["date"])
+    data_date = date.fromisoformat(data["date"]).year
     """
     if not mp.contains(data_structs, data_date):
         elem = lt.newList("ARRAY_LIST", cmpfunction=compare_elements)
