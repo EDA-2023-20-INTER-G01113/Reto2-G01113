@@ -242,7 +242,6 @@ def req_1(control,team, condition, numero):
     if condition =="indiferent":
         condition= "MatchResults"
     resultados,total_teams,total_partidos= model.req_1(control,team,condition)
-    print(resultados)
     if resultados!= "El equipo no tiene partidos en esa condicion":
         Forcondition= lt.size(resultados)
         resultado=resultados
