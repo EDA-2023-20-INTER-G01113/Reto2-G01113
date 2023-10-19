@@ -91,6 +91,8 @@ def addData(data_structs, data, llave):
     """
     #TODO: Crear la función para agregar elementos a una lista
     add_element(data_structs[llave],data)
+    if llave=="results":
+        addMatchResultsByTeam(data_structs,data)
           
 
 def add_element(data_structs, data):
