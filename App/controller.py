@@ -28,7 +28,7 @@ import tracemalloc
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
-
+from tabulate import tabulate
 """
 El controlador se encarga de mediar entre la vista y el modelo.
 """
@@ -81,7 +81,6 @@ def load_data(control, data_size):
     return_results=model.first_last_three_elems(results, r_dates, n_results)
     return_shootouts=model.first_last_three_elems(shootouts, s_dates, n_shootouts)
     return_scores = model.first_last_three_elems(scores, sc_dates, n_scores)
-
 
     
 
@@ -306,8 +305,30 @@ def req_6(control):
     Retorna el resultado del requerimiento 6
     """
     # TODO: Modificar el requerimiento 6
-    pass
-
+    n_teams = 11
+    tournament = "FIFA World Cup qualification"
+    year = 2021
+    elems,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city  = model.req_6(control['model'], n_teams, tournament, year)
+    
+    ans_list = lt.newList("ARRAY_LIST")
+    if lt.size(elems) > 6:
+        first_3 = lt.subList(elems, 1 , 3)
+        last_3 = lt.subList(elems, lt.size(elems) - 3, 3)
+        for each in lt.iterator(first_3):
+            lt.addLast(ans_list, each)
+        for each in lt.iterator(last_3):
+            lt.addLast(ans_list, each)
+    else:
+        ans_list = elems
+    
+    return_list = [x for x in lt.iterator(ans_list)]
+    for x in return_list:
+        top_scorer = model.values_to_array(x['top_scorer'])
+        model.sort_players_req6(top_scorer)
+        first_el = lt.getElement(top_scorer, 1)
+        x['top_scorer']= tabulate([first_el],headers="keys",tablefmt="grid")
+        x.pop('match_info')
+    return return_list,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city
 
 def req_7(control):
     """

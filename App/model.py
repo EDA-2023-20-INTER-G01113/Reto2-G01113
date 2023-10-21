@@ -71,7 +71,28 @@ def new_data_structs():
             "jugador_goles": mp.newMap(1000,
                                        maptype="PROBING",
                                        loadfactor= 0.5,
-                                       cmpfunction= cmp_req_2_final)}
+                                       cmpfunction= cmp_req_2_final),
+            #Guarda los equipos que participaron en un torneo para un año determinado.
+            "teams_tournament_year": mp.newMap(1000,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements),
+
+            #Guarda para un equipo, los partidos que sucedieron en un torneo para un año determinado.
+            "team_year_tournament_matches":mp.newMap(1000,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements),
+            #Tiene los goles para una fecha específica (incluído año, mes y día)
+            'scores_date':mp.newMap(1000,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements),
+            'tournaments_by_year':mp.newMap(100,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements),
+    }
 
     
     return n_d
@@ -93,8 +114,11 @@ def addData(data_structs, data, llave):
     add_element(data_structs[llave],data)
     if llave=="results":
         addMatchResultsByTeam(data_structs,data)
+        add_teams_tournament_year(data_structs, data)
+        req6_add_tournament(data_structs['tournaments_by_year'],data)
     if llave=="goal_scorers":
         adicionar_jugador_goles(data_structs, data['scorer'], data)
+        add_score_date(data_structs['scores_date'], data)
           
 
 def add_element(data_structs, data):
@@ -114,6 +138,68 @@ def add_element(data_structs, data):
         value = me.getValue(k_v)
         lt.addLast(value, data)
         mp.put(data_structs, data_date, value)
+    
+def add_teams_tournament_year(data_structs, data):
+    tournament = data['tournament']
+    map1 = data_structs['teams_tournament_year']
+    year = date.fromisoformat(data["date"]).year
+    if not mp.contains(map1, tournament):
+        #Este mapa contiene los torneos.
+        elem = mp.newMap(1000,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements)
+        mp.put(map1, tournament, elem)
+
+    map2=me.getValue(mp.get(map1, tournament))
+    if not mp.contains(map2, year):
+        #Este mapa contiene los años en los que el torneo tiene registros.
+        elem = mp.newMap(200,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements)
+        mp.put(map2, year, elem)
+
+    map3=me.getValue(mp.get(map2, year))
+
+    req6_add_team(map3, data)
+
+    mp.put(map2, year, map3)
+    mp.put(map1, tournament, map2)
+
+    """  if not mp.contains(map3, home_team):
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
+        mp.put(map3, home_team, elem)
+    else:
+        k_v = mp.get(map3,home_team)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+        mp.put(map3, home_team, value)
+
+    if not mp.contains(map3, away_team):
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
+        mp.put(map3, away_team, elem)
+    else:
+        k_v = mp.get(map3,away_team)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+        mp.put(map3, away_team, value) """
+    
+def add_score_date(data_structs, data):
+
+    data_date = date.fromisoformat(data["date"])
+    if not mp.contains(data_structs, data_date):
+        elem = lt.newList("ARRAY_LIST", compare_elements)
+        lt.addLast(elem,data)
+        mp.put(data_structs, data_date, elem)
+    else:
+        k_v = mp.get(data_structs,data_date)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+        mp.put(data_structs, data_date, value)
+
 def addMatchResultsByTeam(data_team,matchResult):
     teamMap= data_team["teams"]
     teamNameA=matchResult['home_team']
@@ -208,6 +294,135 @@ def add_scorer(data_structs):
                     scorer_info['avg_time']= ((scorer_info['avg_time']*(scorer_info['goals']-1))+float(data['minute']))/scorer_info['goals']
                     mp.put(data_structs['scorers_lab'], scorer, scorer_info)
 
+def req6_add_tournament(data_structs, data):
+    tournament = data['tournament']
+    year = str(date.fromisoformat(data['date']).year)
+    city=data['city']
+    country=data['country']
+    if not mp.contains(data_structs, year):
+        elem = mp.newMap(200,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements)
+        mp.put(data_structs, year, elem)
+        mp.put(elem,'cities',mp.newMap(200,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements))
+        mp.put(elem,'countries',lt.newList("ARRAY_LIST",compare_string))
+        mp.put(elem, 'total_matches',0)
+        mp.put(data_structs, tournament, elem)
+    map_year = me.getValue(mp.get(data_structs,year))
+    if not mp.contains(map_year, tournament):
+        elem = mp.newMap(200,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements)
+        mp.put(elem,'cities',mp.newMap(200,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements))
+        mp.put(elem,'countries',lt.newList("ARRAY_LIST",compare_string))
+        mp.put(elem, 'total_matches',0)
+        mp.put(map_year, tournament, elem)
+    k_v = mp.get(map_year,tournament)
+    map2 = me.getValue(k_v)
+    countries = me.getValue(mp.get(map2, 'countries'))
+    if not lt.isPresent(countries,country):
+        lt.addLast(countries, country)
+    cities = me.getValue(mp.get(map2, 'cities'))
+    if not mp.contains(cities, city):
+        mp.put(cities, city, 1)
+    else:
+        number = me.getValue(mp.get(cities, city))
+        number+=1
+        mp.put(cities, city, number)
+    total_matches = me.getValue(mp.get(map2, 'total_matches'))
+    total_matches+=1
+    mp.put(map2, 'total_matches',total_matches)
+    
+    mp.put(data_structs, tournament, map2)
+
+def req6_add_team(data_structs, data):
+    home_team = data['home_team']
+    away_team = data['away_team']
+    if not mp.contains(data_structs, home_team):
+        elem = {'team':home_team,'total_points':0, 
+                'goal_difference':0, 
+                'penalty_points':0, 
+                'matches':0, 
+                'own_goal_points':0, 
+                'wins':0, 
+                'draws':0,
+                'losses':0,
+                'goals_for':0, 
+                'goals_against':0, 
+                'top_scorer':mp.newMap(1000,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements), 
+                'match_info':lt.newList("ARRAY_LIST", compare_results_list)}
+        mp.put(data_structs, home_team, elem)
+    if not mp.contains(data_structs, away_team):
+        elem = {'team':away_team,
+                'total_points':0, 
+                'goal_difference':0, 
+                'penalty_points':0, 
+                'matches':0, 
+                'own_goal_points':0, 
+                'wins':0, 
+                'draws':0,
+                'losses':0,
+                'goals_for':0, 
+                'goals_against':0, 
+                'top_scorer':mp.newMap(1000,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements), 
+                'match_info':lt.newList("ARRAY_LIST", compare_results_list)}
+        mp.put(data_structs, away_team, elem)
+
+    home_team_dic = me.getValue(mp.get(data_structs,home_team))
+    away_team_dic = me.getValue(mp.get(data_structs,away_team))
+    winner = winner_determiner(data)
+
+    if winner == 'home':
+        home_team_dic['total_points']+=3
+        home_team_dic['wins']+=1
+        away_team_dic['losses']+=1
+    elif winner =='draw':
+        home_team_dic['total_points']+=1
+        home_team_dic['draws']+=1
+        away_team_dic['draws']+=1
+        away_team_dic['total_points']+=1
+    elif winner =='away':
+        away_team_dic['total_points']+=3
+        away_team_dic['wins']+=1
+        home_team_dic['losses']+=1
+
+    home_team_dic['goals_for']+=int(data['home_score'])
+    home_team_dic['goals_against']+=int(data['away_score'])
+    away_team_dic['goals_for']+=int(data['away_score'])
+    away_team_dic['goals_against']+=int(data['home_score'])
+
+    home_team_dic['goal_difference']+=(int(data['home_score'])-int(data['away_score']))
+    away_team_dic['goal_difference']+=(int(data['away_score'])-int(data['home_score']))
+    home_team_dic['matches']+=1
+    away_team_dic['matches']+=1
+    lt.addLast(home_team_dic['match_info'],data)
+    lt.addLast(away_team_dic['match_info'],data)
+    mp.put(data_structs,home_team, home_team_dic)
+    mp.put(data_structs, away_team, away_team_dic)
+
+def winner_determiner(data):
+    #Retorna el ganador de un partido. Retorna draw si es empate.
+    if data['home_score']> data['away_score']:
+        return 'home'
+    elif data['home_score']== data['away_score']:
+        return 'draw'
+    elif data['home_score']<data['away_score']:
+        return 'away'
+    
 def elements_lab7(scorers_values, scorers_size):
     #Se devolverá esta lista nativa de python para que tabulate pueda procesarla.
     return_scorers=[]
@@ -284,6 +499,12 @@ def keys_to_array(data_struct):
         lt.addLast(array_list, key)
     return array_list
 
+def values_to_array(data_struct):
+    array_list = lt.newList("ARRAY_LIST")
+    values= mp.valueSet(data_struct)
+    for value in lt.iterator(values):
+        lt.addLast(array_list, value)
+    return array_list
 
 def adicionar_jugador_goles(data_structs, name, data):
     
@@ -380,12 +601,72 @@ def req_5(data_structs):
     pass
 
 
-def req_6(data_structs):
+def req_6(data_structs, n_teams, tournament, year):
     """
     Función que soluciona el requerimiento 6
     """
     # TODO: Realizar el requerimiento 6
-    pass
+    map_tournament = me.getValue(mp.get(data_structs['teams_tournament_year'],tournament))
+    scores_date = data_structs['scores_date']
+    map_year = me.getValue(mp.get(map_tournament, year))
+    teams = values_to_array(map_year)
+    
+    for team in lt.iterator(teams):
+        matches = lt.iterator(team['match_info'])
+        for match in matches:
+            home_team = match['home_team']
+            away_team = match['away_team']
+            m_date = date.fromisoformat(match['date'])
+            if mp.contains(scores_date,m_date):
+                #Se encarga de mirar quiénes marcaron un gol en un partido específico. 
+                #Esto para asegurar que el número de goles y partidos sean distintos (un jugador pudo haber marcado más de un gol en un partido)
+                scorer_list=lt.newList("ARRAY_LIST")
+                scores =me.getValue(mp.get(scores_date, m_date))
+                for score in lt.iterator(scores):
+                    if score['home_team']==home_team and score['away_team']==away_team:
+                        scorer = score['scorer']
+                        if not lt.isPresent(scorer_list, scorer):
+                            lt.addLast(scorer_list, scorer)
+                        if not mp.contains(team['top_scorer'],scorer):
+                            elem={"scorer":scorer, "goals":1, 'matches':0, 'avg_time':float(score['minute'])}
+                            mp.put(team['top_scorer'],scorer, elem)
+                        else:
+                            dic = me.getValue(mp.get(team['top_scorer'],scorer))
+                            dic['goals']+=1
+                            dic['avg_time']= ((dic['avg_time']*(dic['goals']-1))+float(score['minute']))/dic['goals']
+                            mp.put(team['top_scorer'],scorer, dic)
+                        if score['own_goal']=="True":
+                            team['own_goal_points']+=1
+                        if score['penalty']=="True":
+                            team['penalty_points']+=1
+
+                for scorer in lt.iterator(scorer_list):
+                    dic = me.getValue(mp.get(team['top_scorer'],scorer))
+                    dic['matches']+=1
+                    mp.put(team['top_scorer'],scorer, dic)
+    merg.sort(teams, req6_sort_criteria)
+    size = lt.size(teams)
+    if n_teams>size:
+        first_teams = teams
+    else:
+        first_teams = lt.subList(teams,1,n_teams)
+    
+    total_years = mp.size(map_tournament)
+    year_info = me.getValue(mp.get(data_structs['tournaments_by_year'],str(year)))
+    total_tournaments = mp.size(year_info)
+    n_teams_y = lt.size(teams)
+    tournament_info = me.getValue(mp.get(year_info,tournament))
+    total_matches = me.getValue(mp.get(tournament_info, 'total_matches'))
+    n_countries = lt.size(me.getValue(mp.get(tournament_info,'countries')))
+    cities = me.getValue(mp.get(tournament_info, 'cities'))
+    n_cities = mp.size(cities)
+    k_vs = lt.newList("ARRAY_LIST")
+    for key in lt.iterator(mp.keySet(cities)):
+        lt.addLast(k_vs, mp.get(cities,key))
+    merg.sort(k_vs, pop_city_sort_criteria)
+    pop_city = me.getKey(lt.firstElement(k_vs))
+    return first_teams,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city
+
 
 
 def req_7(data_structs):
@@ -476,6 +757,18 @@ def compare_results_list(data1, data2):
     elif date1==date2 and data1['home_team']==data2['home_team'] and data1['away_team']<data2['away_team']:
         return 1
     return -1
+
+def compare_string(data_1, data_2):
+    if data_1 == data_2:
+        return 0
+    elif data_1>data_2:
+        return 1
+    return -1
+
+def pop_city_sort_criteria(data1, data2):
+    if data1['value']>data2['value']:
+        return True
+    return False
 def results_sort_criteria(data_1, data_2):
     """sortCriteria criterio de ordenamiento para las funciones de ordenamiento
 
@@ -554,7 +847,32 @@ def sort(data_structs):
 
 def sort_dates_new_first(list):
     merg.sort(list, dates_new_first_criteria)
-   
+
+def sort_players_req6(data_struct):
+    merg.sort(data_struct, sort_p6_sort_criteria)
+
+def req6_sort_criteria(data1, data2):
+    if data1['total_points']>data2['total_points']:
+        return True
+
+    elif data1['total_points']==data2['total_points'] and data1['goals_for']>data2['goals_for']:
+        return True
     
+    elif data1['total_points']==data2['total_points'] and data1['goals_for']==data2['goals_for'] and data1['penalty_points']>data2['penalty_points']:
+        return True
+    
+    elif data1['total_points']==data2['total_points'] and data1['goals_for']==data2['goals_for'] and data1['penalty_points']==data2['penalty_points'] and data1['goals_against']<data2['goals_against']:
+        return True
+
+    elif data1['total_points']==data2['total_points'] and data1['goals_for']==data2['goals_for'] and data1['penalty_points']==data2['penalty_points'] and data1['goals_against']==data2['goals_against'] and data1['own_goal_points']<data2['own_goal_points']:
+        return True
+    return False
+
+def sort_p6_sort_criteria(data1, data2):
+    if data1['goals']>data2['goals']:
+        return True
+    elif data1['goals'] ==data2['goals'] and data1['avg_time'] <data2['avg_time']:
+        return True
+    return False
 
     

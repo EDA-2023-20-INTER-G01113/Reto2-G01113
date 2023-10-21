@@ -153,7 +153,17 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    tournament = 'FIFA World Cup qualification'
+    teams,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city = controller.req_6(control)
+    print(f'Total number of years with available information: {total_years}')
+    print(f'Total tournaments with available information: {total_tournaments}')
+    print(f'Total teams for {tournament}: {n_teams_y}')
+    print(f'Total matches for {tournament}: {total_matches}')
+    print(f'Total countries for {tournament}: {n_countries}')
+    print(f'Total cities for  {tournament}: {n_cities}')
+    print(f'Most popular city in {tournament}: {pop_city}')
+    print(f'\n')
+    print(f'{tabulate(teams,headers="keys",tablefmt="grid")}')
 
 
 def print_req_7(control):
