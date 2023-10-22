@@ -285,12 +285,27 @@ def req_3(control):
     pass
 
 
-def req_4(control):
+def req_4(control, tournament, start_d, end_d):
     """
     Retorna el resultado del requerimiento 4
     """
     # TODO: Modificar el requerimiento 4
-    pass
+    elems, n_tournaments, n_matches, n_countries, n_cities, n_shootouts = model.req_4(control['model'], tournament,start_d, end_d)
+    ans_list = lt.newList("ARRAY_LIST")
+    if lt.size(elems) > 6:
+        first_3 = lt.subList(elems, 1 , 3)
+        last_3 = lt.newList("ARRAY_LIST")
+        length=lt.size(elems)
+        for x in range(length-2,length+1):
+            lt.addLast(last_3, lt.getElement(elems, x))
+        for each in lt.iterator(first_3):
+            lt.addLast(ans_list, each)
+        for each in lt.iterator(last_3):
+            lt.addLast(ans_list, each)
+    else:
+        ans_list = elems
+    return_list = [x for x in lt.iterator(ans_list)]
+    return return_list, n_tournaments, n_matches, n_countries, n_cities, n_shootouts
 
 
 def req_5(control):
@@ -300,15 +315,13 @@ def req_5(control):
     # TODO: Modificar el requerimiento 5
     pass
 
-def req_6(control):
+def req_6(control,n_teams, tournament, year):
     """
     Retorna el resultado del requerimiento 6
     """
     # TODO: Modificar el requerimiento 6
-    n_teams = 11
-    tournament = "FIFA World Cup qualification"
-    year = 2021
-    elems,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city  = model.req_6(control['model'], n_teams, tournament, year)
+
+    elems,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city  = model.req_6(control['model'], int(n_teams), tournament, int(year))
     
     ans_list = lt.newList("ARRAY_LIST")
     if lt.size(elems) > 6:

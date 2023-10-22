@@ -137,8 +137,17 @@ def print_req_4(control):
         Función que imprime la solución del Requerimiento 4 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 4
-    pass
-
+    tournament = input('Ingrese el torneo: ')
+    start_d = input('Ingrese la fecha de inicio: ')
+    end_d = input('Ingrese la fecha final: ')
+    elems, n_tournaments, n_matches, n_countries, n_cities, n_shootouts = controller.req_4(control,tournament, start_d, end_d)
+    print(f'Total tournaments with available information: {n_tournaments}')
+    print(f'Total matches for {tournament}: {n_matches}')
+    print(f'Total countries for {tournament}: {n_countries}')
+    print(f'Total cities for {tournament}:{n_cities}')
+    print(f'Total shootouts for {tournament}: {n_shootouts}')
+    print(f'\n')
+    print(f'{tabulate(elems,headers="keys",tablefmt="grid")}')
 
 def print_req_5(control):
     """
@@ -153,8 +162,10 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    tournament = 'FIFA World Cup qualification'
-    teams,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city = controller.req_6(control)
+    n_teams= input('Ingrese el número de equipos: ')
+    tournament = input("Ingrese el torneo: ")
+    year= input("Ingrese el año: ")
+    teams,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city = controller.req_6(control,n_teams, tournament, year)
     print(f'Total number of years with available information: {total_years}')
     print(f'Total tournaments with available information: {total_tournaments}')
     print(f'Total teams for {tournament}: {n_teams_y}')

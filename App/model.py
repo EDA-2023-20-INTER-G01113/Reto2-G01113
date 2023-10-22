@@ -92,6 +92,10 @@ def new_data_structs():
                                                maptype="PROBING",
                                                loadfactor=0.5,
                                                cmpfunction=compare_elements),
+            'shootouts_date': mp.newMap(1000, 
+                                  maptype="PROBING",
+                                  loadfactor=0.5,
+                                  cmpfunction=compare_elements),
     }
 
     
@@ -119,6 +123,8 @@ def addData(data_structs, data, llave):
     if llave=="goal_scorers":
         adicionar_jugador_goles(data_structs, data['scorer'], data)
         add_score_date(data_structs['scores_date'], data)
+    if llave=='shootouts':
+        add_shootout_date(data_structs['shootouts_date'], data)
           
 
 def add_element(data_structs, data):
@@ -139,6 +145,18 @@ def add_element(data_structs, data):
         lt.addLast(value, data)
         mp.put(data_structs, data_date, value)
     
+def add_shootout_date(data_structs, data):
+    data_date = date.fromisoformat(data["date"])
+    if not mp.contains(data_structs, data_date):
+        elem = lt.newList("ARRAY_LIST", compare_results_list)
+        lt.addLast(elem,data)
+        mp.put(data_structs, data_date, elem)
+    else:
+        k_v = mp.get(data_structs,data_date)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+        mp.put(data_structs, data_date, value)
+
 def add_teams_tournament_year(data_structs, data):
     tournament = data['tournament']
     map1 = data_structs['teams_tournament_year']
@@ -294,6 +312,7 @@ def add_scorer(data_structs):
                     scorer_info['avg_time']= ((scorer_info['avg_time']*(scorer_info['goals']-1))+float(data['minute']))/scorer_info['goals']
                     mp.put(data_structs['scorers_lab'], scorer, scorer_info)
 
+
 def req6_add_tournament(data_structs, data):
     tournament = data['tournament']
     year = str(date.fromisoformat(data['date']).year)
@@ -305,13 +324,6 @@ def req6_add_tournament(data_structs, data):
                                                loadfactor=0.5,
                                                cmpfunction=compare_elements)
         mp.put(data_structs, year, elem)
-        mp.put(elem,'cities',mp.newMap(200,
-                                               maptype="PROBING",
-                                               loadfactor=0.5,
-                                               cmpfunction=compare_elements))
-        mp.put(elem,'countries',lt.newList("ARRAY_LIST",compare_string))
-        mp.put(elem, 'total_matches',0)
-        mp.put(data_structs, tournament, elem)
     map_year = me.getValue(mp.get(data_structs,year))
     if not mp.contains(map_year, tournament):
         elem = mp.newMap(200,
@@ -323,7 +335,7 @@ def req6_add_tournament(data_structs, data):
                                                loadfactor=0.5,
                                                cmpfunction=compare_elements))
         mp.put(elem,'countries',lt.newList("ARRAY_LIST",compare_string))
-        mp.put(elem, 'total_matches',0)
+        mp.put(elem, 'total_matches',lt.newList("ARRAY_LIST", compare_results_list))
         mp.put(map_year, tournament, elem)
     k_v = mp.get(map_year,tournament)
     map2 = me.getValue(k_v)
@@ -338,7 +350,7 @@ def req6_add_tournament(data_structs, data):
         number+=1
         mp.put(cities, city, number)
     total_matches = me.getValue(mp.get(map2, 'total_matches'))
-    total_matches+=1
+    lt.addLast(total_matches, data)
     mp.put(map2, 'total_matches',total_matches)
     
     mp.put(data_structs, tournament, map2)
@@ -585,7 +597,50 @@ def req_3(data_structs):
     pass
 
 
-def req_4(data_structs):
+def req_4(data_structs, tournament, start_d, end_d):
+    start_y = date.fromisoformat(start_d).year
+    end_y = date.fromisoformat(end_d).year
+    map1 = data_structs['tournaments_by_year']
+    year_i = start_y
+    countries = lt.newList("ARRAY_LIST", compare_string)
+    cities = lt.newList("ARRAY_LIST", compare_string)
+    tournament_matches = lt.newList("ARRAY_LIST",compare_results_list)
+    shootout_matches = 0
+    while int(year_i)<=int(end_y):
+        if mp.contains(map1, str(year_i)):
+            map2= me.getValue(mp.get(map1, str(year_i)))
+            if mp.contains(map2, tournament):
+                map3 = me.getValue(mp.get(map2, tournament))
+                matches = me.getValue(mp.get(map3, 'total_matches'))
+                for match in lt.iterator(matches):
+                    if start_d<match['date']<end_d:
+                        match['winner']='Unavailable'
+                        lt.addLast(tournament_matches, match)
+                        if not lt.isPresent(countries, match['country']):
+                            lt.addLast(countries, match['country'])
+                        if not lt.isPresent(cities, match['city']):
+                            lt.addLast(cities, match['city'])
+
+        year_i= str(int(year_i)+1)
+    
+    shootouts = data_structs['shootouts_date']
+    merg.sort(tournament_matches, req4_sort_criteria)
+    for match in lt.iterator(tournament_matches):
+        m_date = date.fromisoformat(match['date'])
+        if mp.contains(shootouts, m_date):
+            shootout_list= me.getValue(mp.get(shootouts, m_date))
+            shootout = lt.isPresent(shootout_list,match)
+            if shootout:
+                shootout_matches+=1
+                winner=lt.getElement(shootout_list, shootout)['winner']
+                match['winner']=winner
+    n_tournaments = mp.size(data_structs['teams_tournament_year'])
+    n_matches = lt.size(tournament_matches)
+    n_countries = lt.size(countries)
+    n_cities = lt.size(cities)
+
+    return tournament_matches, n_tournaments, n_matches, n_countries, n_cities, shootout_matches
+
     """
     Función que soluciona el requerimiento 4
     """
@@ -656,7 +711,7 @@ def req_6(data_structs, n_teams, tournament, year):
     total_tournaments = mp.size(year_info)
     n_teams_y = lt.size(teams)
     tournament_info = me.getValue(mp.get(year_info,tournament))
-    total_matches = me.getValue(mp.get(tournament_info, 'total_matches'))
+    total_matches = lt.size(me.getValue(mp.get(tournament_info, 'total_matches')))
     n_countries = lt.size(me.getValue(mp.get(tournament_info,'countries')))
     cities = me.getValue(mp.get(tournament_info, 'cities'))
     n_cities = mp.size(cities)
@@ -850,6 +905,17 @@ def sort_dates_new_first(list):
 
 def sort_players_req6(data_struct):
     merg.sort(data_struct, sort_p6_sort_criteria)
+
+def req4_sort_criteria(data1, data2):
+    date1= date.fromisoformat(data1['date'])
+    date2= date.fromisoformat(data2['date'])
+    if date1>date2:
+        return True
+    elif date1==date2 and data1['country']<data2['country']:
+        return True
+    elif date1==date2 and data1['country']==data2['country'] and data1['city']<data2['city']:
+        return True
+    return False
 
 def req6_sort_criteria(data1, data2):
     if data1['total_points']>data2['total_points']:
