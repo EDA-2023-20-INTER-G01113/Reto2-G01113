@@ -101,6 +101,10 @@ def new_data_structs():
                                   maptype="PROBING",
                                   loadfactor=0.5,
                                   cmpfunction=compare_elements),
+            "tournaments_7":mp.newMap(1000,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements)
     }
 
     
@@ -126,6 +130,7 @@ def addData(data_structs, data, llave):
         addMatchResultsByTeam(data_structs,data)
         add_teams_tournament_year(data_structs, data)
         req6_add_tournament(data_structs['tournaments_by_year'],data)
+        add_tournament_req_7(data_structs["tournaments_7"],data)
 
     if llave=="goal_scorers":
         adicionar_jugador_goles(data_structs, data['scorer'], data)
@@ -267,6 +272,21 @@ def newTeam():
     team["MatchResults"]={"list":lt.newList("ARRAY_LIST"), "map":mp.newMap(300,maptype="PROBING", cmpfunction=compare_elements)}
     team["matchResultsByCondition"]=mp.newMap(2,maptype="PROBING")
     return team
+
+def add_tournament_req_7(data_structs,data):
+    tournament= data["tournament"]
+    if not mp.contains(data_structs,tournament):
+        elem= mp.newMap(42000,maptype="PROBING",cmpfunction=compare_elements)
+        data_date= date.fromisoformat(data["date"])
+        add_element(elem,data,data_date)
+        mp.put(data_structs,tournament,elem)
+    else:
+        k_v = mp.get(data_structs,tournament)
+        value = me.getValue(k_v)
+        data_date= date.fromisoformat(data["date"])
+        add_element(value,data,data_date)
+        mp.put(data_structs,tournament,value)
+
 
 def add_shootout(data_structs, data):
     data_date = date.fromisoformat(data["date"])
