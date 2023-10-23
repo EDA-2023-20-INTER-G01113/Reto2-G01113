@@ -278,10 +278,15 @@ def req_2(control, nombre,cant_goles):
     return respuesta 
 
 
-def req_3(control):
+def req_3(control,date_inicial,date_final,team):
     """
     Retorna el resultado del requerimiento 3
     """
+    away,home,ambos, todos,lista=model.req_3(control,date_inicial,date_final,team)
+    if ambos>6:
+        return model.get_data_3(lista,ambos),away,home,ambos,todos
+    return lista,away,home,ambos,todos
+
     # TODO: Modificar el requerimiento 3
     pass
 

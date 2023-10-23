@@ -30,6 +30,7 @@ from DISClib.ADT import list as lt
 from DISClib.ADT import stack as st
 from DISClib.ADT import queue as qu
 from DISClib.ADT import map as mp
+from DISClib.ADT import orderedmap as mpo
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 from DISClib.Algorithms.Sorting import insertionsort as ins
@@ -37,7 +38,7 @@ from DISClib.Algorithms.Sorting import selectionsort as se
 from DISClib.Algorithms.Sorting import mergesort as merg
 from DISClib.Algorithms.Sorting import quicksort as quk
 assert cf
-from datetime import date
+from datetime import date, timedelta
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá
 dos listas, una para los videos, otra para las categorias de los mismos.
@@ -68,6 +69,10 @@ def new_data_structs():
                                   maptype="PROBING",
                                   loadfactor=0.5,
                                   cmpfunction=compare_elements),
+            "goal_scorers_by_year":mp.newMap(42000,
+                                        maptype="PROBING", 
+                                        loadfactor=0.5,
+                                        cmpfunction=compare_elements),
             "jugador_goles": mp.newMap(1000,
                                        maptype="PROBING",
                                        loadfactor= 0.5,
@@ -90,16 +95,17 @@ def addData(data_structs, data, llave):
     Función para agregar nuevos elementos a la lista
     """
     #TODO: Crear la función para agregar elementos a una lista
-    add_element(data_structs[llave],data)
+    data_date = date.fromisoformat(data["date"]).year
+    add_element(data_structs[llave],data,data_date)
     if llave=="results":
         addMatchResultsByTeam(data_structs,data)
+
     if llave=="goal_scorers":
         adicionar_jugador_goles(data_structs, data['scorer'], data)
-          
+        data_date = date.fromisoformat(data["date"])
+        add_element(data_structs["goal_scorers_by_year"],data,data_date)
 
-def add_element(data_structs, data):
-    #TODO xime 
-    data_date = date.fromisoformat(data["date"]).year
+def add_element(data_structs, data,data_date):
     """
     if not mp.contains(data_structs, data_date):
         elem = lt.newList("ARRAY_LIST", cmpfunction=compare_elements)
@@ -123,7 +129,9 @@ def addMatchResultsByTeam(data_team,matchResult):
     else:
         team= newTeam()
         mp.put(teamMap, teamNameA, team)
-    lt.addLast(team["MatchResults"],matchResult)
+    lt.addLast(team["MatchResults"]["list"],matchResult)
+    data_date= date.fromisoformat(matchResult["date"])
+    add_element(team["MatchResults"]["map"],matchResult,data_date)
     addMatchResultByCondition(team, matchResult,teamNameA)
     teamNameB=matchResult['away_team']
     entrys= mp.get(teamMap,teamNameB)
@@ -132,8 +140,12 @@ def addMatchResultsByTeam(data_team,matchResult):
     else:
         team= newTeam()
         mp.put(teamMap, teamNameB, team)
-    lt.addLast(team["MatchResults"],matchResult)
+    lt.addLast(team["MatchResults"]["list"],matchResult)
+    data_date= date.fromisoformat(matchResult["date"])
+    add_element(team["MatchResults"]["map"],matchResult,data_date)
     addMatchResultByCondition(team, matchResult,teamNameB)
+
+
 
 def addMatchResultByCondition(nodo, matchResult, team):
     conditionMap= nodo["matchResultsByCondition"]
@@ -150,7 +162,7 @@ def addMatchResultByCondition(nodo, matchResult, team):
 
 def newTeam():
     team={}
-    team["MatchResults"]=lt.newList("ARRAY_LIST")
+    team["MatchResults"]={"list":lt.newList("ARRAY_LIST"), "map":mp.newMap(300,maptype="PROBING", cmpfunction=compare_elements)}
     team["matchResultsByCondition"]=mp.newMap(2,maptype="PROBING")
     return team
 
@@ -331,10 +343,10 @@ def req_1(data_structs, team, condition):
     if condition!="MatchResults":
         resultado= me.getValue(mp.get(me.getValue(mp.get(data_structs["model"]["teams"],team))["matchResultsByCondition"],condition))
     else:
-        resultado= me.getValue(mp.get(data_structs["model"]["teams"],team))["MatchResults"]
+        resultado= me.getValue(mp.get(data_structs["model"]["teams"],team))["MatchResults"]["list"]
     if resultado:
         total_teams= mp.size(data_structs["model"]["teams"])
-        total_partidos= lt.size(me.getValue(mp.get(data_structs["model"]["teams"],team))["MatchResults"])
+        total_partidos= lt.size(me.getValue(mp.get(data_structs["model"]["teams"],team))["MatchResults"]["list"])
         return merg.sort(resultado,results_sort_criteria),total_teams,total_partidos
     else:
         return "El equipo no tiene partidos en esa condicion",0,0
@@ -356,10 +368,105 @@ def req_2(data_structs, nombre, cant_goles):
         return "El jugador no existe"
 
 
-def req_3(data_structs):
+#def req_3(data_structs, date_in, date_f,team):
     """
     Función que soluciona el requerimiento 3
     """
+    date_inicial=date.fromisoformat(date_in)
+    date_final=date.fromisoformat(date_f)
+    mantener= True
+    resultado= lt.newList("ARRAY_LIST")
+    mapa= me.getValue(mp.get(data_structs["model"]["teams"],team))["MatchResults"]["map"]
+
+    fecha_inicial= mpo.floor(mapa,date_inicial)
+    valor_inicial=me.getValue(mp.get(mapa,fecha_inicial))
+    #goal scorers 
+    auto,penal=its_present_in_goal(data_structs,fecha_inicial)
+    valor_inicial["penalty"]=penal
+    valor_inicial["own_goal"]=auto
+
+    fecha_final= mpo.ceiling(mapa,date_final)
+    valor_final= me.getValue(mp.get(mapa,fecha_final))
+    #goal scorers 
+    auto_1,penal_1=its_present_in_goal(data_structs,fecha_final)
+    valor_final["penalty"]=penal_1
+    valor_final["own_goal"]= auto_1
+    
+    lt.addLast(resultado,valor_final)
+    while mantener==True:
+        fecha_fin = fecha_final + timedelta(days=1)
+        fecha_final= mpo.ceiling(mapa,fecha_fin)
+        if fecha_inicial==fecha_final:
+            lt.addFirst(resultado,valor_inicial)
+            mantener=False
+        valor_extra= me.getValue(mp.get(mapa,fecha_final))
+        auto_1,penal_1=its_present_in_goal(data_structs,fecha_final)
+        valor_extra["penalty"]=penal_1
+        valor_extra["own_goal"]= auto_1
+        lt.addFirst(resultado,valor_extra)
+    return resultado
+def req_3(data_structs, date_in, date_f,team):
+    """
+    Función que soluciona el requerimiento 3
+    """
+    away_team= 0
+    home_team=0
+    lista=lt.newList("ARRAY_LIST")
+    todos=lt.newList("ARRAY_LIST")
+    date_inicial=date.fromisoformat(date_in).year
+    date_final=date.fromisoformat(date_f).year
+    date_inicial_fecha=date.fromisoformat(date_in)
+    date_final_fecha=date.fromisoformat(date_f)
+    mapa= data_structs["model"]["results"]
+    resultado= mp.keySet(mapa)
+    for key in lt.iterator(resultado):
+
+        if date_final>=key and key>=date_inicial:
+            valor= me.getValue(mp.get(mapa,key))
+            for cada in lt.iterator(valor):
+                fecha= date.fromisoformat(cada["date"])
+                if date_final_fecha>=fecha and fecha>=date_inicial_fecha:
+
+                #para todos
+                    away=cada["away_team"]
+                    todos = its_present_partidos(todos,away)
+                    home= cada["home_team"]
+                    todos = its_present_partidos(todos,home)
+                    if away==team:
+                        away_team+=1
+                        auto,penal=its_present_in_goal(data_structs,fecha,away,"away_team")
+                        cada["penalty"]=penal
+                        cada["own_goal"]=auto
+                        lt.addLast(lista,cada)
+                    elif home==team:
+                        home_team+=1
+                        auto,penal=its_present_in_goal(data_structs,fecha,home,"home_team")
+                        cada["penalty"]=penal
+                        cada["own_goal"]=auto
+                        lt.addLast(lista,cada)
+    return away_team,home_team,(away_team + home_team), lt.size(todos),lista
+def its_present_partidos(lista,team):
+    n= lt.isPresent(lista,team)
+    if n==0:
+        lt.addLast(lista,team)
+    return lista
+def its_present_in_goal(data_structs,fecha,equipo,condicion):
+    auto="unknown"
+    penal="unknown"
+    entry= mp.get(data_structs["model"]["goal_scorers_by_year"],fecha)
+    if entry:
+        entry= me.getValue(entry)
+        for cada in lt.iterator(entry):
+            equi= cada[condicion]
+            if equi==equipo:
+                if penal!="True":
+                    penal=cada["penalty"]
+                if auto!="True":
+                    auto= cada["own_goal"]
+                
+    return auto,penal
+        
+
     # TODO: Realizar el requerimiento 3
     pass
 
