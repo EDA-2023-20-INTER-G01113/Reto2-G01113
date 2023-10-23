@@ -28,7 +28,7 @@ import tracemalloc
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
-
+from tabulate import tabulate
 """
 El controlador se encarga de mediar entre la vista y el modelo.
 """
@@ -81,7 +81,6 @@ def load_data(control, data_size):
     return_results=model.first_last_three_elems(results, r_dates, n_results)
     return_shootouts=model.first_last_three_elems(shootouts, s_dates, n_shootouts)
     return_scores = model.first_last_three_elems(scores, sc_dates, n_scores)
-
 
     
 
@@ -291,12 +290,27 @@ def req_3(control,date_inicial,date_final,team):
     pass
 
 
-def req_4(control):
+def req_4(control, tournament, start_d, end_d):
     """
     Retorna el resultado del requerimiento 4
     """
     # TODO: Modificar el requerimiento 4
-    pass
+    elems, n_tournaments, n_matches, n_countries, n_cities, n_shootouts = model.req_4(control['model'], tournament,start_d, end_d)
+    ans_list = lt.newList("ARRAY_LIST")
+    if lt.size(elems) > 6:
+        first_3 = lt.subList(elems, 1 , 3)
+        last_3 = lt.newList("ARRAY_LIST")
+        length=lt.size(elems)
+        for x in range(length-2,length+1):
+            lt.addLast(last_3, lt.getElement(elems, x))
+        for each in lt.iterator(first_3):
+            lt.addLast(ans_list, each)
+        for each in lt.iterator(last_3):
+            lt.addLast(ans_list, each)
+    else:
+        ans_list = elems
+    return_list = [x for x in lt.iterator(ans_list)]
+    return return_list, n_tournaments, n_matches, n_countries, n_cities, n_shootouts
 
 
 def req_5(control):
@@ -306,13 +320,33 @@ def req_5(control):
     # TODO: Modificar el requerimiento 5
     pass
 
-def req_6(control):
+def req_6(control,n_teams, tournament, year):
     """
     Retorna el resultado del requerimiento 6
     """
     # TODO: Modificar el requerimiento 6
-    pass
 
+    elems,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city  = model.req_6(control['model'], int(n_teams), tournament, int(year))
+    
+    ans_list = lt.newList("ARRAY_LIST")
+    if lt.size(elems) > 6:
+        first_3 = lt.subList(elems, 1 , 3)
+        last_3 = lt.subList(elems, lt.size(elems) - 3, 3)
+        for each in lt.iterator(first_3):
+            lt.addLast(ans_list, each)
+        for each in lt.iterator(last_3):
+            lt.addLast(ans_list, each)
+    else:
+        ans_list = elems
+    
+    return_list = [x for x in lt.iterator(ans_list)]
+    for x in return_list:
+        top_scorer = model.values_to_array(x['top_scorer'])
+        model.sort_players_req6(top_scorer)
+        first_el = lt.getElement(top_scorer, 1)
+        x['top_scorer']= tabulate([first_el],headers="keys",tablefmt="grid")
+        x.pop('match_info')
+    return return_list,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city
 
 def req_7(control):
     """
