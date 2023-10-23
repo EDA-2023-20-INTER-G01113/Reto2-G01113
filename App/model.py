@@ -129,11 +129,11 @@ def addData(data_structs, data, llave):
 
     if llave=="goal_scorers":
         adicionar_jugador_goles(data_structs, data['scorer'], data)
-          
+        data_date=date.fromisoformat(data["date"])
+        add_element(data_structs["goal_scorers_by_year"],data,data_date)
 
-def add_element(data_structs, data):
+def add_element(data_structs, data, data_date):
     #TODO xime 
-    data_date = date.fromisoformat(data["date"]).year
     """
     if not mp.contains(data_structs, data_date):
         elem = lt.newList("ARRAY_LIST", cmpfunction=compare_elements)
