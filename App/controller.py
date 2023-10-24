@@ -345,7 +345,6 @@ def req_6(control,n_teams, tournament, year):
         model.sort_players_req6(top_scorer)
         first_el = lt.getElement(top_scorer, 1)
         x['top_scorer']= tabulate([first_el],headers="keys",tablefmt="grid")
-        x.pop('match_info')
     return return_list,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city
 
 def req_7(control,torneo,numero):
@@ -384,9 +383,6 @@ def req_8(control, team, start_y, end_y):
 
     return_list = [x for x in lt.iterator(ans_list)]
     for x in return_list:
-        x.pop('dates')
-        x.pop('home_matches')
-        x.pop('away_matches')
         if lt.size(x['top_scorer']):
             top_scorer = model.values_to_array(x['top_scorer'])
             model.sort_players_req6(top_scorer)

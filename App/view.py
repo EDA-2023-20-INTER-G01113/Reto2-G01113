@@ -172,6 +172,8 @@ def print_req_6(control):
     tournament = input("Ingrese el torneo: ")
     year= input("Ingrese el año: ")
     teams,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city = controller.req_6(control,n_teams, tournament, year)
+    for team in teams:
+        team.pop('match_info')
     print(f'Total number of years with available information: {total_years}')
     print(f'Total tournaments with available information: {total_tournaments}')
     print(f'Total teams for {tournament}: {n_teams_y}')
@@ -208,7 +210,10 @@ def print_req_8(control):
     start_y = input("Ingrese el año de inicio: ")
     end_y = input("Ingrese el año final: ")
     elems, n_years, total_matches, home_matches, away_matches, oldest_date, newest_match = controller.req_8(control, team, start_y, end_y)
-
+    for elem in elems:
+        elem.pop('dates')
+        elem.pop('home_matches')
+        elem.pop('away_matches')
     print(f'\n')
     print(f'{team} Statistics')
     print(f'Total matches: {total_matches}')
