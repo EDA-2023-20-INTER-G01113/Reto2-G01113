@@ -1044,7 +1044,7 @@ def req_7(data_structs,torneo,numero):
         if goles:
             goles=me.getValue(goles)
             for cada in lt.iterator(goles):
-                if cada["away_team"]==key["away_team"]:
+                if cada["away_team"]==key["away_team"] and cada["home_team"]==key["home_team"] :
                     if str(cada["penalty"])=="True":
                         penalties+=1
                     if str(cada["own_goal"])=="True":
