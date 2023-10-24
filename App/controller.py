@@ -238,6 +238,7 @@ def req_1(control,team, condition, numero):
     Retorna el resultado del requerimiento 1
     """
     # TODO: Modificar el requerimiento 1
+    start_time = get_time()
     if condition =="indiferent":
         condition= "MatchResults"
     resultados,total_teams,total_partidos= model.req_1(control,team,condition)
@@ -248,9 +249,15 @@ def req_1(control,team, condition, numero):
             resultado= lt.subList(resultados,1,numero)
         tamano=lt.size(resultado)
         if tamano> 6:
-            return model.get_data_3(resultado,tamano),total_teams,total_partidos,Forcondition
-        return resultado,total_teams,total_partidos,Forcondition
-    return resultados,0,0,0
+            stop_time = get_time()
+            delta_times = delta_time(start_time,stop_time)
+            return model.get_data_3(resultado,tamano),total_teams,total_partidos,Forcondition,delta_times
+        stop_time = get_time()
+        delta_times = delta_time(start_time,stop_time)
+        return resultado,total_teams,total_partidos,Forcondition,delta_times
+    stop_time = get_time()
+    delta_times = delta_time(start_time,stop_time)
+    return resultados,0,0,0,delta_times
 
     
 
@@ -258,6 +265,7 @@ def req_1(control,team, condition, numero):
 def req_2(control, nombre,cant_goles):
     """
     Retorna el resultado del requerimiento 2
+
     """
     goles = model.req_2(control["model"], nombre, cant_goles)
     if goles=="El jugador no existe":
@@ -281,10 +289,15 @@ def req_3(control,date_inicial,date_final,team):
     """
     Retorna el resultado del requerimiento 3
     """
+    start_time = get_time()
     away,home,ambos, todos,lista=model.req_3(control,date_inicial,date_final,team)
     if ambos>6:
-        return model.get_data_3(lista,ambos),away,home,ambos,todos
-    return lista,away,home,ambos,todos
+        stop_time = get_time()
+        delta_times = delta_time(start_time,stop_time)
+        return model.get_data_3(lista,ambos),away,home,ambos,todos,delta_times
+    stop_time = get_time()
+    delta_times = delta_time(start_time,stop_time)
+    return lista,away,home,ambos,todos,delta_times
 
     # TODO: Modificar el requerimiento 3
     pass
@@ -295,6 +308,7 @@ def req_4(control, tournament, start_d, end_d):
     Retorna el resultado del requerimiento 4
     """
     # TODO: Modificar el requerimiento 4
+    start_time = get_time()
     elems, n_tournaments, n_matches, n_countries, n_cities, n_shootouts = model.req_4(control['model'], tournament,start_d, end_d)
     ans_list = lt.newList("ARRAY_LIST")
     if lt.size(elems) > 6:
@@ -310,7 +324,9 @@ def req_4(control, tournament, start_d, end_d):
     else:
         ans_list = elems
     return_list = [x for x in lt.iterator(ans_list)]
-    return return_list, n_tournaments, n_matches, n_countries, n_cities, n_shootouts
+    stop_time = get_time()
+    delta_times = delta_time(start_time,stop_time)
+    return return_list, n_tournaments, n_matches, n_countries, n_cities, n_shootouts,delta_times
 
 
 def req_5(control):
@@ -325,7 +341,7 @@ def req_6(control,n_teams, tournament, year):
     Retorna el resultado del requerimiento 6
     """
     # TODO: Modificar el requerimiento 6
-
+    start_time = get_time()
     elems,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city  = model.req_6(control['model'], int(n_teams), tournament, int(year))
     
     ans_list = lt.newList("ARRAY_LIST")
@@ -346,18 +362,25 @@ def req_6(control,n_teams, tournament, year):
         first_el = lt.getElement(top_scorer, 1)
         x['top_scorer']= tabulate([first_el],headers="keys",tablefmt="grid")
         x.pop('match_info')
-    return return_list,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city
+    stop_time = get_time()
+    delta_times = delta_time(start_time,stop_time)
+    return return_list,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city,delta_times
 
 def req_7(control,torneo,numero):
     """
     Retorna el resultado del requerimiento 7
     """
     # TODO: Modificar el requerimiento 7
+    start_time = get_time()
     total_tourn,total_scorers,total_matches,goals,penalties,autogoles,resultado=model.req_7(control,torneo,numero)
     total_player=lt.size(resultado)
     if total_player>6:
-        return model.get_data_3(resultado,total_player),total_tourn,total_scorers,total_matches,goals,penalties,autogoles,total_player
-    return resultado,total_tourn,total_scorers,total_matches,goals,penalties,autogoles,total_player
+        stop_time = get_time()
+        delta_times = delta_time(start_time,stop_time)
+        return model.get_data_3(resultado,total_player),total_tourn,total_scorers,total_matches,goals,penalties,autogoles,total_player,delta_times
+    stop_time = get_time()
+    delta_times = delta_time(start_time,stop_time)
+    return resultado,total_tourn,total_scorers,total_matches,goals,penalties,autogoles,total_player,delta_times
 
 
 def req_8(control, team, start_y, end_y):
@@ -365,6 +388,7 @@ def req_8(control, team, start_y, end_y):
     Retorna el resultado del requerimiento 8
     """
     # TODO: Modificar el requerimiento 8
+    start_time = get_time()
     elems, n_years, total_matches, home_matches, away_matches, oldest_date, newest_match = model.req_8(control['model'],team, start_y, end_y)
     ans_list = lt.newList("ARRAY_LIST")
     if lt.size(elems) > 6:
@@ -395,7 +419,9 @@ def req_8(control, team, start_y, end_y):
             x['top_scorer']= tabulate([first_el],headers="keys",tablefmt="grid")
         else:
             x['top_scorer']='No scorer data available'
-    return return_list, n_years, total_matches, home_matches, away_matches, oldest_date, newest_match
+    stop_time = get_time()
+    delta_times = delta_time( start_time,stop_time)
+    return return_list, n_years, total_matches, home_matches, away_matches, oldest_date, newest_match,delta_times
 # Funciones para medir tiempos de ejecucion
 
 def get_time():
