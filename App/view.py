@@ -124,10 +124,16 @@ def print_req_2(control, nombre,cant_goles):
     print(controller.req_2(control, nombre, cant_goles))
 
 
-def print_req_3(control):
+def print_req_3(control,date_inicial,data_final,team):
     """
         Función que imprime la solución del Requerimiento 3 en consola
     """
+    lista,away,home,ambos,todos=controller.req_3(control,date_inicial,data_final,team)
+    print("total teams with information: "+ str(todos))
+    print("Total games for: "+str(team)+": " + str(ambos))
+    print("Total home games: "+ str(home))
+    print("total away games: " + str(away))
+    print(lista)
     # TODO: Imprimir el resultado del requerimiento 3
     pass
 
@@ -259,7 +265,10 @@ if __name__ == "__main__":
             
 
         elif int(inputs) == 4:
-            print_req_3(control)
+            data_inicial= input("Inicio: ")
+            data_final= input("Final: ")
+            team= input("Equipo: ")
+            print_req_3(control,data_inicial,data_final,team)
 
         elif int(inputs) == 5:
             print_req_4(control)
