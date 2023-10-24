@@ -997,24 +997,14 @@ def req_5(data_structs, nombre, fecha_inicio, fecha_final):
           
         for cada_1 in lt.iterator(periodo):
             fecha = cada_1["date"]
-            #print(cada) bien
-            #print(fecha) bien
             if mp.contains(data_structs["torneo_anio"],fecha):
-                #print(mp.contains(data_structs["torneo_anio"],fecha)) True
                 fechas_entry = mp.get(data_structs["torneo_anio"], fecha)
-                #print(fechas_entry) bien
                 fechas_values = me.getValue(fechas_entry)
-                #print(fechas_values) bien
                 for cada_2 in lt.iterator(fechas_values):
-                    #print(cada) bien
                     home_score = cada_2["home_score"]                            
-                    #print(home_score) 
                     away_score = cada_2["away_score"]
-                    #print(away_score)
                     tournament = cada_2["tournament"]
-                    #print(tournament) 
                     cada_1["home_score"] = home_score
-                    #print(cada_1)
                     cada_1["away_score"] = away_score
                     cada_1["tournament"] = tournament
                              
