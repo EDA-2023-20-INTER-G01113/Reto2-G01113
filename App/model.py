@@ -1217,9 +1217,13 @@ def req_8(data_structs, team, start_y, end_y):
     last_year_list = me.getValue(mp.get(team_map, lt.lastElement(years_list)['year']))['dates']
     merg.sort(first_year_list,dates_new_first_criteria)
     merg.sort(last_year_list, dates_new_first_criteria)
-
     oldest_date = lt.lastElement(last_year_list)
     newest_match_d =lt.firstElement(first_year_list)
+
+    merg.sort(years_list, req8_sort_criteria)
+    first_year_list= me.getValue(mp.get(team_map, lt.firstElement(years_list)['year']))['dates']
+    last_year_list = me.getValue(mp.get(team_map, lt.lastElement(years_list)['year']))['dates']
+
     results_list = me.getValue(mp.get(results, newest_match_d))
     for element in lt.iterator(results_list):
         if element['home_team']==team or element['away_team']==team:
@@ -1346,6 +1350,10 @@ def dates_new_first_criteria(data1, data2):
     if data1>data2:
         return True
     return False
+def dates_old_first_criteria(data1, data2):
+    if data1<data2:
+        return True
+    return False
 
 def cmp_crit_goal_req_2(data_1, data_2):
     date_1 = date.fromisoformat(data_1["date"])
@@ -1443,4 +1451,16 @@ def sort_p6_sort_criteria(data1, data2):
         return True
     return False
 
-    
+def req8_sort_criteria(data1, data2):
+    if data1['total_points']>data2['total_points']:
+        return True
+    elif data1['total_points']==data2['total_points'] and data1['goal_difference']>data2['goal_difference']:
+        return True
+    elif data1['total_points']==data2['total_points'] and data1['goal_difference']==data2['goal_difference']:
+        return True
+    elif data1['total_points']==data2['total_points'] and data1['goal_difference']==data2['goal_difference'] and data1['penalties']>data2['penalties']:
+        return True
+    elif data1['total_points']==data2['total_points'] and data1['goal_difference']==data2['goal_difference'] and data1['penalties']==data2['penalties'] and data1['matches']<data2['matches']:
+        return True
+    elif data1['total_points']==data2['total_points'] and data1['goal_difference']==data2['goal_difference'] and data1['penalties']==data2['penalties'] and data1['matches']==data2['matches'] and data1['own_goals']<data2['own_goals']:
+        return True
