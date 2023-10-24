@@ -107,11 +107,12 @@ def print_req_1(control,team, condition,numero):
     """
         Función que imprime la solución del Requerimiento 1 en consola
     """
-    resultados, total_teams, total_partidos ,total_condition= controller.req_1(control,team,condition,numero)
+    resultados, total_teams, total_partidos ,total_condition,delta= controller.req_1(control,team,condition,numero)
     print("Total teams with avalaible information: " + str(total_teams))
     print("Total matches for "+ str(team) + ": "+ str(total_partidos))
     print("Total matches for "+ str(team) + " as "+str(condition)+" : "+ str(total_condition))
     print(resultados)
+    print(delta)
     # TODO: Imprimir el resultado del requerimiento 1
     pass
 
@@ -125,10 +126,17 @@ def print_req_2(control, nombre,cant_goles):
     print(controller.req_2(control, nombre, cant_goles))
 
 
-def print_req_3(control):
+def print_req_3(control,date_inicial,data_final,team):
     """
         Función que imprime la solución del Requerimiento 3 en consola
     """
+    lista,away,home,ambos,todos,delta=controller.req_3(control,date_inicial,data_final,team)
+    print("total teams with information: "+ str(todos))
+    print("Total games for: "+str(team)+": " + str(ambos))
+    print("Total home games: "+ str(home))
+    print("total away games: " + str(away))
+    print(lista)
+    print(delta)
     # TODO: Imprimir el resultado del requerimiento 3
     pass
 
@@ -141,7 +149,7 @@ def print_req_4(control):
     tournament = input('Ingrese el torneo: ')
     start_d = input('Ingrese la fecha de inicio: ')
     end_d = input('Ingrese la fecha final: ')
-    elems, n_tournaments, n_matches, n_countries, n_cities, n_shootouts = controller.req_4(control,tournament, start_d, end_d)
+    elems, n_tournaments, n_matches, n_countries, n_cities, n_shootouts,delta = controller.req_4(control,tournament, start_d, end_d)
     print(f'Total tournaments with available information: {n_tournaments}')
     print(f'Total matches for {tournament}: {n_matches}')
     print(f'Total countries for {tournament}: {n_countries}')
@@ -149,6 +157,7 @@ def print_req_4(control):
     print(f'Total shootouts for {tournament}: {n_shootouts}')
     print(f'\n')
     print(f'{tabulate(elems,headers="keys",tablefmt="grid")}')
+    print(delta)
 
 def print_req_5(control):
     """
@@ -168,7 +177,9 @@ def print_req_6(control):
     n_teams= input('Ingrese el número de equipos: ')
     tournament = input("Ingrese el torneo: ")
     year= input("Ingrese el año: ")
-    teams,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city = controller.req_6(control,n_teams, tournament, year)
+    teams,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city,delta = controller.req_6(control,n_teams, tournament, year)
+    for team in teams:
+        team.pop('match_info')
     print(f'Total number of years with available information: {total_years}')
     print(f'Total tournaments with available information: {total_tournaments}')
     print(f'Total teams for {tournament}: {n_teams_y}')
@@ -178,14 +189,24 @@ def print_req_6(control):
     print(f'Most popular city in {tournament}: {pop_city}')
     print(f'\n')
     print(f'{tabulate(teams,headers="keys",tablefmt="grid")}')
+    print(delta)
 
 
-def print_req_7(control):
+def print_req_7(control,torneo,numero):
     """
         Función que imprime la solución del Requerimiento 7 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 7
-    pass
+    resultado,total_tourn,total_scorers,total_matches,goals,penalties,autogoles,total_player,delta=controller.req_7(control,torneo,numero)
+    print("Total tournaments with available information: "+ str(total_tourn))
+    print("Total players for "+ str(torneo)+ " : " +str(total_scorers))
+    print("Total matches for "+ str(torneo)+ " : " +str(total_matches))
+    print("Total goals for "+ str(torneo)+ " : " +str(goals))
+    print("Total penalties for "+ str(torneo)+ " : " +str(penalties))
+    print("Total own goals for "+ str(torneo)+ " : " +str(autogoles))
+    print("Total players with "+ str(numero)+ " points : " +str(total_player))
+    print(resultado)
+    print(delta)
 
 
 def print_req_8(control):
@@ -193,7 +214,29 @@ def print_req_8(control):
         Función que imprime la solución del Requerimiento 8 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 8
-    pass
+    team = input("Ingrese el equipo: ")
+    start_y = input("Ingrese el año de inicio: ")
+    end_y = input("Ingrese el año final: ")
+    elems, n_years, total_matches, home_matches, away_matches, oldest_date, newest_match, delta= controller.req_8(control, team, start_y, end_y)
+    for elem in elems:
+        elem.pop('dates')
+        elem.pop('home_matches')
+        elem.pop('away_matches')
+    print(f'\n')
+    print(f'{team} Statistics')
+    print(f'Total years with available information: {n_years}')
+    print(f'Total matches: {total_matches}')
+    print(f'Total home matches: {home_matches}')
+    print(f'Total away matches: {away_matches}')
+    print(f'Oldest match date: {oldest_date}')
+    print(f'Newest match data: ')
+    print(f'\n')
+    print(f'{tabulate([newest_match],headers="keys",tablefmt="grid")}')
+    print(f'\n')
+    print(f'Yearly statistics: ')
+    print(f'\n')
+    print(f'{tabulate(elems,headers="keys",tablefmt="grid")}')
+    print(delta)
 
 def print_lab_7(control):
     maptype=input("Ingrese si quiere un mapa PROBING o CHAINING (P/C): ")
@@ -245,7 +288,10 @@ if __name__ == "__main__":
             
 
         elif int(inputs) == 4:
-            print_req_3(control)
+            data_inicial= input("Inicio: ")
+            data_final= input("Final: ")
+            team= input("Equipo: ")
+            print_req_3(control,data_inicial,data_final,team)
 
         elif int(inputs) == 5:
             print_req_4(control)
@@ -257,7 +303,9 @@ if __name__ == "__main__":
             print_req_6(control)
 
         elif int(inputs) == 8:
-            print_req_7(control)
+            torneo= input("ingrese el torneo: ")
+            numero=int(input("Ingrese el numero: "))
+            print_req_7(control,torneo,numero)
 
         elif int(inputs) == 9:
             print_req_8(control)
