@@ -109,7 +109,7 @@ def new_data_structs():
             "tournaments_7":mp.newMap(1000,
                                                maptype="PROBING",
                                                loadfactor=0.5,
-                                               cmpfunction=compare_elements),,
+                                               cmpfunction=compare_elements),
             'team_year_info': mp.newMap(500, 
                                   maptype="PROBING",
                                   loadfactor=0.5,
