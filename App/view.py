@@ -204,7 +204,24 @@ def print_req_8(control):
         Función que imprime la solución del Requerimiento 8 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 8
-    pass
+    team = input("Ingrese el equipo: ")
+    start_y = input("Ingrese el año de inicio: ")
+    end_y = input("Ingrese el año final: ")
+    elems, n_years, total_matches, home_matches, away_matches, oldest_date, newest_match = controller.req_8(control, team, start_y, end_y)
+
+    print(f'\n')
+    print(f'{team} Statistics')
+    print(f'Total matches: {total_matches}')
+    print(f'Total home matches: {home_matches}')
+    print(f'Total away matches: {away_matches}')
+    print(f'Oldest match date: {oldest_date}')
+    print(f'Newest match data: ')
+    print(f'\n')
+    print(f'{tabulate([newest_match],headers="keys",tablefmt="grid")}')
+    print(f'\n')
+    print(f'Yearly statistics: ')
+    print(f'\n')
+    print(f'{tabulate(elems,headers="keys",tablefmt="grid")}')
 
 def print_lab_7(control):
     maptype=input("Ingrese si quiere un mapa PROBING o CHAINING (P/C): ")
