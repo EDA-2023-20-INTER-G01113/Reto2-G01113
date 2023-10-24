@@ -121,6 +121,7 @@ def print_req_2(control, nombre,cant_goles):
         Función que imprime la solución del Requerimiento 2 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 2
+    
     print(controller.req_2(control, nombre, cant_goles))
 
 
@@ -154,8 +155,10 @@ def print_req_5(control):
         Función que imprime la solución del Requerimiento 5 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 5
-    pass
-
+    nombre = input("Ingrese el nombre del jugador: ")
+    fecha_inicial = input("Ingrese la fecha inicial del periodo: ")
+    fecha_final = input("Ingrese la fecha final del periodo: ")
+    print(controller.req_5(control, nombre,fecha_inicial, fecha_final))
 
 def print_req_6(control):
     """

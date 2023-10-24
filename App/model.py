@@ -96,6 +96,14 @@ def new_data_structs():
                                   maptype="PROBING",
                                   loadfactor=0.5,
                                   cmpfunction=compare_elements),
+            "anotaciones_por_periodo": mp.newMap(1000,
+                                                             maptype="CHAINING",
+                                                             loadfactor=0.5,
+                                                             cmpfunction = cmp_req_2_final), 
+            "torneo_anio": mp.newMap(1000,
+                                     maptype= "PROBING",
+                                     loadfactor= 0.5,
+                                     cmpfunction=compare_elements)
     }
 
     
@@ -120,9 +128,11 @@ def addData(data_structs, data, llave):
         addMatchResultsByTeam(data_structs,data)
         add_teams_tournament_year(data_structs, data)
         req6_add_tournament(data_structs['tournaments_by_year'],data)
+        adicionar_torneo_anio(data_structs, data["date"], data)
     if llave=="goal_scorers":
         adicionar_jugador_goles(data_structs, data['scorer'], data)
         add_score_date(data_structs['scores_date'], data)
+        adicionar_anotaciones_por_periodo(data_structs, data["scorer"],data)
     if llave=='shootouts':
         add_shootout_date(data_structs['shootouts_date'], data)
           
@@ -530,6 +540,8 @@ def adicionar_jugador_goles(data_structs, name, data):
         lt.addLast(value,data)
         mp.put(data_structs["jugador_goles"],name, value)
         
+
+
 # Funciones de consulta
 
 def get_data_3(data_structs,tamano):
@@ -546,6 +558,30 @@ def get_data_3(data_structs,tamano):
         p = lt.getElement(data_structs, (tamano-2+b))
         lt.addLast(resultados, p)
     return resultados
+
+
+def adicionar_anotaciones_por_periodo(data_structs, nombre, data):
+    if mp.contains(data_structs["anotaciones_por_periodo"],nombre):
+        k_v = mp.get(data_structs["anotaciones_por_periodo"],nombre)
+        value = me.getValue(k_v)
+        lt.addLast(value,data)
+       
+    else:
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
+        mp.put(data_structs["anotaciones_por_periodo"],nombre, elem)
+        
+
+def adicionar_torneo_anio(data_structs, fecha, data):
+    if mp.contains(data_structs["torneo_anio"],fecha):
+        k_v = mp.get(data_structs["torneo_anio"],fecha)
+        value = me.getValue(k_v)
+        lt.addLast(value,data)
+        mp.put(data_structs["torneo_anio"],fecha, value)
+    else: 
+        elem = lt.newList("ARRAY_LIST")
+        lt.addLast(elem, data)
+        mp.put(data_structs["torneo_anio"],fecha, elem)        
 
 
 def data_size(data_structs):
@@ -648,12 +684,64 @@ def req_4(data_structs, tournament, start_d, end_d):
     pass
 
 
-def req_5(data_structs):
+def req_5(data_structs, nombre, fecha_inicio, fecha_final):
     """
     Función que soluciona el requerimiento 5
     """
+    anio_inicio = date.fromisoformat(fecha_inicio).year
+    anio_final = date.fromisoformat(fecha_final).year
+    periodo = lt.newList("ARRAY_LIST")   
+    info_torneo_anio = { } 
+    
+    if mp.contains(data_structs["anotaciones_por_periodo"],nombre):
+        goles_entry = mp.get(data_structs["anotaciones_por_periodo"],nombre)
+        goles = me.getValue(goles_entry)
+        merg.sort(goles,cmp_crit_goal_req_2)
+        
+        for fecha in lt.iterator(goles):
+            fecha_goles = date.fromisoformat(fecha["date"]).year
+            if fecha_goles >= anio_inicio and fecha_goles <= anio_final:
+                lt.addLast(periodo, fecha)
+          
+        for cada in lt.iterator(periodo):
+            fecha = cada["date"]
+            #print(cada) bien
+            #print(fecha) bien
+            if mp.contains(data_structs["torneo_anio"],fecha):
+                #print(mp.contains(data_structs["torneo_anio"],fecha)) True
+                fechas_entry = mp.get(data_structs["torneo_anio"], fecha)
+                #print(fechas_entry) bien
+                fechas_values = me.getValue(fechas_entry)
+                #print(fechas_values) bien
+                for cada in lt.iterator(fechas_values):
+                    print(cada)
+                    home_score = cada["home_score"]             
+                    #print(home_score) 
+                    away_score = cada["away_score"]
+                    #print(away_score)
+                    tournament = cada["tournament"]
+                    #print(tournament) 
+                    info_torneo_anio = {"home_score": home_score,
+                                        "away_score": away_score,
+                                        "tournament": tournament,                      
+                        } 
+                    print(info_torneo_anio)
+                     
+                for lista in lt.iterator(periodo):
+                    print(lista)
+                    #tamanio = lt.size(lista)
+                    print(lt.insertElement(periodo,info_torneo_anio,(lt.size(lista)-1)))
+                    
+
+                            
+        
+        return periodo           
+    else:
+        return "No se encuentran anotaciones realizadas por este jugador en el periodo de tiempo dado."  
+    
     # TODO: Realizar el requerimiento 5
-    pass
+    
+    
 
 
 def req_6(data_structs, n_teams, tournament, year):
@@ -864,6 +952,17 @@ def cmp_crit_goal_req_2(data_1, data_2):
             return True
         return False
     return False
+
+def cmp_req_5(data_1, data_2):
+    """""
+    date_1 = date.fromisoformat(data_1["date"])
+    date_2 = date.fromisoformat(data_2["date"])
+    
+    if date_1 > date_2:
+        return True
+    else:
+        return False
+    """
 
 # Funciones de ordenamiento
 

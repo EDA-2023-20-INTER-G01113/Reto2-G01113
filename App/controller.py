@@ -308,12 +308,28 @@ def req_4(control, tournament, start_d, end_d):
     return return_list, n_tournaments, n_matches, n_countries, n_cities, n_shootouts
 
 
-def req_5(control):
+def req_5(control, nombre, fecha_inicio, fecha_final):
     """
     Retorna el resultado del requerimiento 5
     """
+    periodo = model.req_5(control["model"], nombre, fecha_inicio, fecha_final)
+    if periodo == "No se encuentran anotaciones realizadas por este jugador en el periodo de tiempo dado.":
+        return periodo
+    
+    elif lt.size(periodo) > 6:
+        primeros_tres = lt.subList(periodo, 1 , 3)
+        ultimos_tres = lt.subList(periodo, lt.size(periodo) - 3, lt.size(periodo))
+        for cada in lt.iterator(primeros_tres):
+            lt.addLast(respuesta, cada)
+        for cada in lt.iterator(ultimos_tres):
+            lt.addLast(respuesta, cada)
+    else:
+        respuesta=periodo
+                
+    return respuesta 
+    
     # TODO: Modificar el requerimiento 5
-    pass
+    
 
 def req_6(control,n_teams, tournament, year):
     """
