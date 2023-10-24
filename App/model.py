@@ -88,11 +88,24 @@ def new_data_structs():
                                                maptype="PROBING",
                                                loadfactor=0.5,
                                                cmpfunction=compare_elements),
+            'results_date': mp.newMap(1000,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements),
+
             'tournaments_by_year':mp.newMap(100,
                                                maptype="PROBING",
                                                loadfactor=0.5,
                                                cmpfunction=compare_elements),
             'shootouts_date': mp.newMap(1000, 
+                                  maptype="PROBING",
+                                  loadfactor=0.5,
+                                  cmpfunction=compare_elements),
+            'team_year_info': mp.newMap(500, 
+                                  maptype="PROBING",
+                                  loadfactor=0.5,
+                                  cmpfunction=compare_elements),
+            'team_year_results': mp.newMap(500, 
                                   maptype="PROBING",
                                   loadfactor=0.5,
                                   cmpfunction=compare_elements),
@@ -120,9 +133,12 @@ def addData(data_structs, data, llave):
         addMatchResultsByTeam(data_structs,data)
         add_teams_tournament_year(data_structs, data)
         req6_add_tournament(data_structs['tournaments_by_year'],data)
+        req8_add_team(data_structs, data, llave)
+        add_result_date(data_structs['results_date'],data)
     if llave=="goal_scorers":
         adicionar_jugador_goles(data_structs, data['scorer'], data)
         add_score_date(data_structs['scores_date'], data)
+        req8_add_team(data_structs, data, llave)
     if llave=='shootouts':
         add_shootout_date(data_structs['shootouts_date'], data)
           
@@ -146,6 +162,18 @@ def add_element(data_structs, data):
         mp.put(data_structs, data_date, value)
     
 def add_shootout_date(data_structs, data):
+    data_date = date.fromisoformat(data["date"])
+    if not mp.contains(data_structs, data_date):
+        elem = lt.newList("ARRAY_LIST", compare_results_list)
+        lt.addLast(elem,data)
+        mp.put(data_structs, data_date, elem)
+    else:
+        k_v = mp.get(data_structs,data_date)
+        value = me.getValue(k_v)
+        lt.addLast(value, data)
+        mp.put(data_structs, data_date, value)
+
+def add_result_date(data_structs, data):
     data_date = date.fromisoformat(data["date"])
     if not mp.contains(data_structs, data_date):
         elem = lt.newList("ARRAY_LIST", compare_results_list)
@@ -425,6 +453,182 @@ def req6_add_team(data_structs, data):
     lt.addLast(away_team_dic['match_info'],data)
     mp.put(data_structs,home_team, home_team_dic)
     mp.put(data_structs, away_team, away_team_dic)
+
+def req8_add_team(data_structs, data, llave):
+
+    map1 = data_structs['team_year_info']
+    year = date.fromisoformat(data["date"]).year
+    data_date = date.fromisoformat(data['date'])
+
+    if llave == "results":
+        home_team = data['home_team']
+        away_team = data['away_team']
+        
+        if not mp.contains(map1, home_team):
+            elem1 = mp.newMap(200,
+                                                maptype="PROBING",
+                                                loadfactor=0.5,
+                                                cmpfunction=compare_years)
+
+            mp.put(map1, home_team, elem1)
+
+        if not mp.contains(map1, away_team):
+            elem2 = mp.newMap(200,
+                                                maptype="PROBING",
+                                                loadfactor=0.5,
+                                                cmpfunction=compare_years)
+            mp.put(map1, away_team, elem2)
+
+        h_map2=me.getValue(mp.get(map1, home_team))
+        if not mp.contains(h_map2, int(year)):
+            elem = {"year":year, 
+                    'matches':0,
+                    'total_points':0,
+                    'goal_difference':0,
+                    'penalties':0,
+                    'own_goals':0,
+                    'wins':0,
+                    'draws':0,
+                    'losses':0,
+                    'goals_for':0,
+                    'goals_against':0,
+                    'top_scorer':mp.newMap(50,
+                                                maptype="PROBING",
+                                                loadfactor=0.5,
+                                                cmpfunction=compare_elements),
+                    'dates':lt.newList("ARRAY_LIST", compare_string),
+                    'home_matches':0,
+                    'away_matches':0,
+                    }
+            
+            mp.put(h_map2, year, elem)
+            mp.put(map1,home_team, h_map2)
+
+        a_map2= me.getValue(mp.get(map1, away_team))
+        if not mp.contains(a_map2, str(year)):
+            #Este mapa contiene los años en los que el torneo tiene registros.
+            elem2 =  {"year":year, 
+                    'matches':0,
+                    'total_points':0,
+                    'goal_difference':0,
+                    'penalties':0,
+                    'own_goals':0,
+                    'wins':0,
+                    'draws':0,
+                    'losses':0,
+                    'goals_for':0,
+                    'goals_against':0,
+                    'top_scorer':mp.newMap(50,
+                                                maptype="PROBING",
+                                                loadfactor=0.5,
+                                                cmpfunction=compare_elements),
+                    'dates':lt.newList("ARRAY_LIST", compare_string),
+                    'home_matches':0,
+                    'away_matches':0,}
+            
+            mp.put(a_map2, year, elem2)
+            mp.put(map1,away_team, a_map2)
+        
+
+        home_team_dic = me.getValue(mp.get(h_map2,year))
+        away_team_dic = me.getValue(mp.get(a_map2,year))
+        home_team_dic['home_matches']+=1
+        away_team_dic['away_matches']+=1
+        if not lt.isPresent(home_team_dic['dates'], data_date):
+            lt.addLast(home_team_dic['dates'],data_date)
+        if not lt.isPresent(away_team_dic['dates'], data_date):
+            lt.addLast(away_team_dic['dates'],data_date)
+        winner = winner_determiner(data)
+        if winner == 'home':
+            home_team_dic['total_points']+=3
+            home_team_dic['wins']+=1
+            away_team_dic['losses']+=1
+        elif winner =='draw':
+            home_team_dic['total_points']+=1
+            home_team_dic['draws']+=1
+            away_team_dic['draws']+=1
+            away_team_dic['total_points']+=1
+        elif winner =='away':
+            away_team_dic['total_points']+=3
+            away_team_dic['wins']+=1
+            home_team_dic['losses']+=1
+
+        home_team_dic['goals_for']+=int(data['home_score'])
+        home_team_dic['goals_against']+=int(data['away_score'])
+        away_team_dic['goals_for']+=int(data['away_score'])
+        away_team_dic['goals_against']+=int(data['home_score'])
+
+        home_team_dic['goal_difference']+=(int(data['home_score'])-int(data['away_score']))
+        away_team_dic['goal_difference']+=(int(data['away_score'])-int(data['home_score']))
+        home_team_dic['matches']+=1
+        away_team_dic['matches']+=1
+
+        mp.put(h_map2,year, home_team_dic)
+        mp.put(a_map2, year, away_team_dic)
+        mp.put(map1,home_team, h_map2)
+        mp.put(map1, away_team, a_map2)
+    elif llave =="goal_scorers":
+        team = data['team']
+
+        if not mp.contains(map1, team):
+            elem1 = mp.newMap(200,
+                                                maptype="PROBING",
+                                                loadfactor=0.5,
+                                                cmpfunction=compare_years)
+            
+            mp.put(map1, team, elem1)
+
+        map_team = me.getValue(mp.get(map1,team))
+
+        if not mp.contains(map_team, year):
+
+            elem2 =  {"year":year, 
+                    'matches':0,
+                    'total_points':0,
+                    'goal_difference':0,
+                    'penalties':0,
+                    'own_goals':0,
+                    'wins':0,
+                    'draws':0,
+                    'losses':0,
+                    'goals_for':0,
+                    'goals_against':0,
+                    'top_scorer':mp.newMap(50,
+                                                maptype="PROBING",
+                                                loadfactor=0.5,
+                                                cmpfunction=compare_elements),
+                    'dates':lt.newList("ARRAY_LIST", compare_string),
+                    'home_matches':0,
+                    'away_matches':0,}
+            
+            mp.put(map_team, year, elem2)
+            mp.put(map1,team, map_team)
+
+        dic_team = me.getValue(mp.get(map_team, year))
+        scorer = data['scorer']
+        if not mp.contains(dic_team['top_scorer'],scorer):
+            if data['minute'] and data['scorer']:
+                elem={"scorer":scorer, "goals":1, 'matches':1, 'avg_time':float(data['minute']),'match_dates':lt.newList('ARRAY_LIST',compare_string)}
+                lt.addLast(elem['match_dates'],data_date)
+                mp.put(dic_team['top_scorer'],scorer, elem)
+        else:
+            if data['minute'] and data['scorer']:
+                dic = me.getValue(mp.get(dic_team['top_scorer'],scorer))
+                dic['goals']+=1
+                dic['avg_time']= ((dic['avg_time']*(dic['goals']-1))+float(data['minute']))/dic['goals']
+                if not lt.isPresent(dic['match_dates'],data_date):
+                    dic['matches']+=1
+                    lt.addLast(dic['match_dates'],data_date)
+                mp.put(dic_team['top_scorer'],scorer, dic)
+        if data['own_goal']=="True":
+            dic_team['own_goals']+=1
+        if data['penalty']=="True":
+            dic_team['penalties']+=1
+        
+        mp.put(map_team, year, dic_team)
+        mp.put(map1,team,map_team)
+    
+    
 
 def winner_determiner(data):
     #Retorna el ganador de un partido. Retorna draw si es empate.
@@ -732,14 +936,45 @@ def req_7(data_structs):
     pass
 
 
-def req_8(data_structs):
+def req_8(data_structs, team, start_y, end_y):
     """
     Función que soluciona el requerimiento 8
     """
     # TODO: Realizar el requerimiento 8
-    pass
+    map1 = data_structs['team_year_info']
+    y_i = start_y
+    n_years = 0
+    team_map = me.getValue(mp.get(map1, team))
+    home_matches = 0
+    away_matches = 0
+    
 
+    years_list = lt.newList("ARRAY_LIST")
+    while int(y_i)<=int(end_y):
+        if mp.contains(team_map,int(y_i)):
+            n_years+=1
+            year_dic = me.getValue(mp.get(team_map, int(y_i)))
+            home_matches+=year_dic['home_matches']
+            away_matches+=year_dic['away_matches']
+            lt.addLast(years_list, year_dic)
+        y_i = str(int(y_i)+1)
+    sort_years_first(years_list)
+    results = data_structs['results_date']
 
+    first_year_list= me.getValue(mp.get(team_map, lt.firstElement(years_list)['year']))['dates']
+    last_year_list = me.getValue(mp.get(team_map, lt.lastElement(years_list)['year']))['dates']
+    merg.sort(first_year_list,dates_new_first_criteria)
+    merg.sort(last_year_list, dates_new_first_criteria)
+
+    oldest_date = lt.lastElement(last_year_list)
+    newest_match_d =lt.firstElement(first_year_list)
+    results_list = me.getValue(mp.get(results, newest_match_d))
+    for element in lt.iterator(results_list):
+        if element['home_team']==team or element['away_team']==team:
+            newest_match = element
+    total_matches = home_matches+away_matches
+
+    return years_list, n_years, total_matches, home_matches, away_matches, oldest_date, newest_match
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 def compare(data_1, data_2):
@@ -762,6 +997,14 @@ def compare_elements(keyname, element):
     if keyname== shootout_entry:
         return 0
     elif keyname>shootout_entry:
+        return 1
+    else:
+        return -1
+def compare_years(keyname, element):
+    entry = me.getKey(element)
+    if int(keyname)== int(entry):
+        return 0
+    elif int(keyname)>int(entry):
         return 1
     else:
         return -1
@@ -903,6 +1146,13 @@ def sort(data_structs):
 def sort_dates_new_first(list):
     merg.sort(list, dates_new_first_criteria)
 
+def sort_years_first(lista):
+    merg.sort(lista, years_first_sort_criteria)
+
+def years_first_sort_criteria(data1, data2):
+    if data1['year']>data2['year']:
+        return True
+    return False
 def sort_players_req6(data_struct):
     merg.sort(data_struct, sort_p6_sort_criteria)
 

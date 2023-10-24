@@ -119,8 +119,8 @@ def load_data_mask(control, filegoalscorers, fileresults, fileshootouts):
     """
     # TODO: Realizar la carga de datos
     archivos =lt.newList()
-    lt.addLast(archivos,filegoalscorers)
     lt.addLast(archivos,fileresults)
+    lt.addLast(archivos,filegoalscorers)
     lt.addLast(archivos,fileshootouts)
     for archivo in lt.iterator(archivos):
         file = cf.data_dir  + archivo
@@ -351,14 +351,42 @@ def req_7(control):
     pass
 
 
-def req_8(control):
+def req_8(control, team, start_y, end_y):
     """
     Retorna el resultado del requerimiento 8
     """
     # TODO: Modificar el requerimiento 8
-    pass
+    elems, n_years, total_matches, home_matches, away_matches, oldest_date, newest_match = model.req_8(control['model'],team, start_y, end_y)
+    ans_list = lt.newList("ARRAY_LIST")
+    if lt.size(elems) > 6:
+        first_3 = lt.subList(elems, 1,3)
+        last_3 = lt.newList("ARRAY_LIST")
+        length=lt.size(elems)
+        
+        
+        for x in range(length-2,length+1):
+            lt.addLast(last_3, lt.getElement(elems, x))
+        for each in lt.iterator(first_3):
+            lt.addLast(ans_list, each)
+        for each in lt.iterator(last_3):
+            lt.addLast(ans_list, each)
+    else:
+        ans_list = elems
 
-
+    return_list = [x for x in lt.iterator(ans_list)]
+    for x in return_list:
+        x.pop('dates')
+        x.pop('home_matches')
+        x.pop('away_matches')
+        if lt.size(x['top_scorer']):
+            top_scorer = model.values_to_array(x['top_scorer'])
+            model.sort_players_req6(top_scorer)
+            first_el = lt.getElement(top_scorer, 1)
+            first_el.pop('match_dates')
+            x['top_scorer']= tabulate([first_el],headers="keys",tablefmt="grid")
+        else:
+            x['top_scorer']='No scorer data available'
+    return return_list, n_years, total_matches, home_matches, away_matches, oldest_date, newest_match
 # Funciones para medir tiempos de ejecucion
 
 def get_time():
