@@ -690,9 +690,8 @@ def req_5(data_structs, nombre, fecha_inicio, fecha_final):
     """
     anio_inicio = date.fromisoformat(fecha_inicio).year
     anio_final = date.fromisoformat(fecha_final).year
-    periodo = lt.newList("ARRAY_LIST")   
-    info_torneo_anio = { } 
-    
+    periodo = lt.newList("ARRAY_LIST")  
+     
     if mp.contains(data_structs["anotaciones_por_periodo"],nombre):
         goles_entry = mp.get(data_structs["anotaciones_por_periodo"],nombre)
         goles = me.getValue(goles_entry)
@@ -703,8 +702,8 @@ def req_5(data_structs, nombre, fecha_inicio, fecha_final):
             if fecha_goles >= anio_inicio and fecha_goles <= anio_final:
                 lt.addLast(periodo, fecha)
           
-        for cada in lt.iterator(periodo):
-            fecha = cada["date"]
+        for cada_1 in lt.iterator(periodo):
+            fecha = cada_1["date"]
             #print(cada) bien
             #print(fecha) bien
             if mp.contains(data_structs["torneo_anio"],fecha):
@@ -713,28 +712,19 @@ def req_5(data_structs, nombre, fecha_inicio, fecha_final):
                 #print(fechas_entry) bien
                 fechas_values = me.getValue(fechas_entry)
                 #print(fechas_values) bien
-                for cada in lt.iterator(fechas_values):
-                    print(cada)
-                    home_score = cada["home_score"]             
+                for cada_2 in lt.iterator(fechas_values):
+                    #print(cada) bien
+                    home_score = cada_2["home_score"]                            
                     #print(home_score) 
-                    away_score = cada["away_score"]
+                    away_score = cada_2["away_score"]
                     #print(away_score)
-                    tournament = cada["tournament"]
+                    tournament = cada_2["tournament"]
                     #print(tournament) 
-                    info_torneo_anio = {"home_score": home_score,
-                                        "away_score": away_score,
-                                        "tournament": tournament,                      
-                        } 
-                    print(info_torneo_anio)
-                     
-                for lista in lt.iterator(periodo):
-                    print(lista)
-                    #tamanio = lt.size(lista)
-                    print(lt.insertElement(periodo,info_torneo_anio,(lt.size(lista)-1)))
-                    
-
-                            
-        
+                    cada_1["home_score"] = home_score
+                    #print(cada_1)
+                    cada_1["away_score"] = away_score
+                    cada_1["tournament"] = tournament
+                             
         return periodo           
     else:
         return "No se encuentran anotaciones realizadas por este jugador en el periodo de tiempo dado."  
