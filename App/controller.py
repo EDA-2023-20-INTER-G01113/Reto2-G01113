@@ -348,12 +348,16 @@ def req_6(control,n_teams, tournament, year):
         x.pop('match_info')
     return return_list,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city
 
-def req_7(control):
+def req_7(control,torneo,numero):
     """
     Retorna el resultado del requerimiento 7
     """
     # TODO: Modificar el requerimiento 7
-    pass
+    total_tourn,total_scorers,total_matches,goals,penalties,autogoles,resultado=model.req_7(control,torneo,numero)
+    total_player=lt.size(resultado)
+    if total_player>6:
+        return model.get_data_3(resultado,total_player),total_tourn,total_scorers,total_matches,goals,penalties,autogoles,total_player
+    return resultado,total_tourn,total_scorers,total_matches,goals,penalties,autogoles,total_player
 
 
 def req_8(control):

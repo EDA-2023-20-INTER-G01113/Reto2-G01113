@@ -183,12 +183,20 @@ def print_req_6(control):
     print(f'{tabulate(teams,headers="keys",tablefmt="grid")}')
 
 
-def print_req_7(control):
+def print_req_7(control,torneo,numero):
     """
         Función que imprime la solución del Requerimiento 7 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 7
-    pass
+    resultado,total_tourn,total_scorers,total_matches,goals,penalties,autogoles,total_player=controller.req_7(control,torneo,numero)
+    print("Total tournaments with available information: "+ str(total_tourn))
+    print("Total players for "+ str(torneo)+ " : " +str(total_scorers))
+    print("Total matches for "+ str(torneo)+ " : " +str(total_matches))
+    print("Total goals for "+ str(torneo)+ " : " +str(goals))
+    print("Total penalties for "+ str(torneo)+ " : " +str(penalties))
+    print("Total own goals for "+ str(torneo)+ " : " +str(autogoles))
+    print("Total players with "+ str(numero)+ " points : " +str(total_player))
+    print(resultado)
 
 
 def print_req_8(control):
@@ -263,7 +271,9 @@ if __name__ == "__main__":
             print_req_6(control)
 
         elif int(inputs) == 8:
-            print_req_7(control)
+            torneo= input("ingrese el torneo: ")
+            numero=int(input("Ingrese el numero: "))
+            print_req_7(control,torneo,numero)
 
         elif int(inputs) == 9:
             print_req_8(control)

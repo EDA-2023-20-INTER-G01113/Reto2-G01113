@@ -104,7 +104,7 @@ def new_data_structs():
             "tournaments_7":mp.newMap(1000,
                                                maptype="PROBING",
                                                loadfactor=0.5,
-                                               cmpfunction=compare_elements)
+                                               cmpfunction=compare_elements),
     }
 
     
@@ -134,8 +134,11 @@ def addData(data_structs, data, llave):
 
     if llave=="goal_scorers":
         adicionar_jugador_goles(data_structs, data['scorer'], data)
+        add_score_date(data_structs['scores_date'], data)
         data_date=date.fromisoformat(data["date"])
         add_element(data_structs["goal_scorers_by_year"],data,data_date)
+    if llave=="shootouts":
+        add_shootout_date(data_structs['shootouts_date'], data)
 
 def add_element(data_structs, data, data_date):
     #TODO xime 
@@ -276,15 +279,13 @@ def newTeam():
 def add_tournament_req_7(data_structs,data):
     tournament= data["tournament"]
     if not mp.contains(data_structs,tournament):
-        elem= mp.newMap(42000,maptype="PROBING",cmpfunction=compare_elements)
-        data_date= date.fromisoformat(data["date"])
-        add_element(elem,data,data_date)
+        elem= lt.newList("ARRAY_LIST")
+        lt.addLast(elem,data)
         mp.put(data_structs,tournament,elem)
     else:
         k_v = mp.get(data_structs,tournament)
         value = me.getValue(k_v)
-        data_date= date.fromisoformat(data["date"])
-        add_element(value,data,data_date)
+        lt.addLast(value,data)
         mp.put(data_structs,tournament,value)
 
 
@@ -619,43 +620,6 @@ def req_2(data_structs, nombre, cant_goles):
         return "El jugador no existe"
 
 
-#def req_3(data_structs, date_in, date_f,team):
-    """
-    Función que soluciona el requerimiento 3
-    """
-    date_inicial=date.fromisoformat(date_in)
-    date_final=date.fromisoformat(date_f)
-    mantener= True
-    resultado= lt.newList("ARRAY_LIST")
-    mapa= me.getValue(mp.get(data_structs["model"]["teams"],team))["MatchResults"]["map"]
-
-    fecha_inicial= mpo.floor(mapa,date_inicial)
-    valor_inicial=me.getValue(mp.get(mapa,fecha_inicial))
-    #goal scorers 
-    auto,penal=its_present_in_goal(data_structs,fecha_inicial)
-    valor_inicial["penalty"]=penal
-    valor_inicial["own_goal"]=auto
-
-    fecha_final= mpo.ceiling(mapa,date_final)
-    valor_final= me.getValue(mp.get(mapa,fecha_final))
-    #goal scorers 
-    auto_1,penal_1=its_present_in_goal(data_structs,fecha_final)
-    valor_final["penalty"]=penal_1
-    valor_final["own_goal"]= auto_1
-    
-    lt.addLast(resultado,valor_final)
-    while mantener==True:
-        fecha_fin = fecha_final + timedelta(days=1)
-        fecha_final= mpo.ceiling(mapa,fecha_fin)
-        if fecha_inicial==fecha_final:
-            lt.addFirst(resultado,valor_inicial)
-            mantener=False
-        valor_extra= me.getValue(mp.get(mapa,fecha_final))
-        auto_1,penal_1=its_present_in_goal(data_structs,fecha_final)
-        valor_extra["penalty"]=penal_1
-        valor_extra["own_goal"]= auto_1
-        lt.addFirst(resultado,valor_extra)
-    return resultado
 def req_3(data_structs, date_in, date_f,team):
     """
     Función que soluciona el requerimiento 3
@@ -695,7 +659,7 @@ def req_3(data_structs, date_in, date_f,team):
                         cada["penalty"]=penal
                         cada["own_goal"]=auto
                         lt.addLast(lista,cada)
-    return away_team,home_team,(away_team + home_team), lt.size(todos),lista
+    return away_team,home_team,(away_team + home_team), lt.size(todos),merg.sort(lista,results_sort_criteria)
 def its_present_partidos(lista,team):
     n= lt.isPresent(lista,team)
     if n==0:
@@ -849,12 +813,175 @@ def req_6(data_structs, n_teams, tournament, year):
 
 
 
-def req_7(data_structs):
+def req_7(data_structs,torneo,numero):
     """
     Función que soluciona el requerimiento 7
     """
-    # TODO: Realizar el requerimiento 7
-    pass
+
+    mapa=mp.newMap(15,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements)
+    mapa_final= mp.newMap(200,
+                                               maptype="PROBING",
+                                               loadfactor=0.5,
+                                               cmpfunction=compare_elements)
+
+    lista_torneo= me.getValue(mp.get(data_structs["model"]["tournaments_7"],torneo))
+    mapa_scorers= data_structs["model"]["goal_scorers_by_year"]
+    goals=0
+    penalties= 0
+    autogoles=0
+    for key in lt.iterator(lista_torneo):
+        fecha=date.fromisoformat(key["date"])
+        goles= mp.get(mapa_scorers,fecha)
+        goals+= int(key["home_score"])
+        goals+= int(key["away_score"])
+        if goles:
+            goles=me.getValue(goles)
+            for cada in lt.iterator(goles):
+                if cada["away_team"]==key["away_team"]:
+                    if str(cada["penalty"])=="True":
+                        penalties+=1
+                    if str(cada["own_goal"])=="True":
+                        autogoles+=1
+                    nombre= cada["scorer"]
+                    equipo= cada["team"]
+                    entry= mp.get(mapa_final,nombre)
+                    if entry:
+                        valor=me.getValue(entry)
+                    else:
+                        valor=name(nombre)
+                        mp.put(mapa_final,nombre,valor)
+                    mapa=mapa_final_borrar(mapa,valor)
+                    valor= valores_req_7(cada,valor,key,equipo)
+                    mapa=mapa_final_añadir(mapa,valor)
+    total_tourn= mp.size(data_structs["model"]["tournaments_7"])
+    total_scorers= mp.size(mapa_final)
+    total_matches= lt.size(lista_torneo)
+
+                
+    return total_tourn,total_scorers,total_matches,goals,penalties,autogoles,requerimiento_7(mapa,numero)
+            
+def valores_req_7(cada,valor,data,equipo):
+    penalty=str(cada["penalty"])
+    auto= str(cada["own_goal"])
+    puntaje=1
+    if penalty=="True":
+        valor["penalty_goals"]+=1
+        puntaje+=1
+    if auto=="True":
+        valor["own_goals"]+=1
+        puntaje-=1
+    casa=data["home_team"]
+    visi=data["away_team"]
+    win=valor["scored_in_wins"]
+    lose= valor["scored_in_losses"]
+    empa= valor["scored_in_draws"]
+    if data["home_score"]>data["away_score"]:
+        if casa==equipo:
+            valor["scored_in_wins"]=win+1
+        else:
+            valor["scored_in_losses"]=lose+1
+    elif data["away_score"]>data["home_score"]:
+        if visi == equipo:
+            valor["scored_in_wins"]=win+1
+        else:
+            valor["scored_in_losses"]=lose+1
+    elif data["away_score"]==data["home_score"]:
+        valor["scored_in_draws"]=empa+1
+    promedio= valor["avg_time [min]"]
+    valor["avg_time [min]"]= promedio *(valor["total_goals"])+float(cada["minute"])/(valor["total_goals"]+1)
+    valor["total_points"]+=puntaje
+    valor["total_goals"]+=1
+    fecha=date.fromisoformat(cada["date"])
+    fecha_ya= valor["last_goal"]["date"]
+    if fecha >fecha_ya:
+        valor["last_goal"]={"date":fecha,"tornament":data["tournament"],"home_team":casa,"away_team":visi,"home_score":data["home_score"],
+                            "away_score": data["away_score"],"minute":cada["minute"],"penalty":penalty,"own:goal":auto}
+
+    return valor 
+
+def requerimiento_7(mapa,numero):
+    entry= mp.get(mapa,numero)
+    if entry:
+        lista= me.getValue(entry)["datos"]
+        merg.sort(lista,ordenar_req_7)
+    return lista
+        
+
+def ordenar_req_7(dato1,dato2):
+    if dato1["total_points"]>dato2["total_points"]:
+        return True
+    elif dato1["total_points"]==dato2["total_points"]:
+        if  dato1["total_goals"]>dato2["total_goals"]:
+            return True
+        elif dato1["total_goals"]==dato2["total_goals"]:
+            if dato1["penalty_goals"]>dato2["penalty_goals"]:
+                return True
+            if dato1["penalty_goals"]==dato2["penalty_goals"]:
+                if dato1["own_goals"]<dato2["own_goals"]:
+                    return True
+                if dato1["own_goals"]==dato2["own_goals"]:
+                    if dato1["avg_time [min]"]<dato2["avg_time [min]"]:
+                        return True
+                    else:
+                        return False
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+    else:
+        return False
+                        
+
+
+    
+
+
+def mapa_final_borrar(mapa,valor):
+    puntajein= valor["total_points"]
+    nombre= valor["nombre"]
+    primero=mp.get(mapa,puntajein)
+    if primero:
+        lis=me.getValue(primero)
+        numero= lt.isPresent(lis["lista"],nombre)
+        if numero!=0:
+            lt.deleteElement(lis["lista"],numero)
+            lt.deleteElement(lis["datos"],numero)
+    return mapa
+
+def mapa_final_añadir(mapa,valor):
+    puntaje= valor["total_points"]
+    nombre=valor["nombre"]
+    entry=mp.get(mapa,puntaje)
+    if entry:
+        lista=me.getValue(entry)
+    else:
+        lista={"lista":lt.newList("ARRAY_LIST"), "datos":lt.newList("ARRAY_LIST")}
+        mp.put(mapa,puntaje,lista)
+    lt.addLast(lista["lista"],nombre)
+    lt.addLast(lista["datos"],valor)
+    return mapa
+
+
+    
+                
+def name(nombre):
+    nam={}
+    nam["nombre"]=nombre
+    nam["total_points"]=0
+    nam["total_goals"]=0
+    nam["penalty_goals"]=0
+    nam["own_goals"]=0
+    nam["avg_time [min]"]=0
+    nam["scored_in_wins"]=0
+    nam["scored_in_losses"]=0
+    nam["scored_in_draws"]=0
+    nam["last_goal"]={"date":date.fromisoformat("1000-01-01")}
+    return nam
 
 
 def req_8(data_structs):
