@@ -33,6 +33,7 @@ This repository is part of the data structure and algorithms (#EDA) teaching fra
 The students edit this section to add their names, Uniandes emails, and specify which project functionality of the project they will implement.
 
 1. Ximena Lopez, ax.loopez@uniandes.edu.co, funcion 3, 202312848.
+1. Juan David Torres, jd.torresa1@uniandes.edu.co funcion 5, 202317608
 1. Sofia Losada, s.losadam@uniandes.edu.co, funcion 5, 202221008.
 
 [Back to top](#challenge-template)
