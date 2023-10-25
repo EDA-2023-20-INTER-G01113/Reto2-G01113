@@ -147,7 +147,7 @@ def print_req_4(control):
     # TODO: Imprimir el resultado del requerimiento 4
     tournament = input('Ingrese el torneo: ')
     start_d = input('Ingrese la fecha de inicio: ')
-    end_d = input('Ingrese la fecha final: ')
+    end_d = input('Ingrese la fecha final: ') 
     elems, n_tournaments, n_matches, n_countries, n_cities, n_shootouts,delta = controller.req_4(control,tournament, start_d, end_d)
     print(f'Total tournaments with available information: {n_tournaments}')
     print(f'Total matches for {tournament}: {n_matches}')
@@ -171,12 +171,16 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    n_teams= input('Ingrese el número de equipos: ')
+    tournament = "FIFA World Cup qualification"
+    n_teams = 11
+    year=2021
+
+    """ n_teams= input('Ingrese el número de equipos: ')
     tournament = input("Ingrese el torneo: ")
-    year= input("Ingrese el año: ")
+    year= input("Ingrese el año: ") """
+
     teams,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city,delta = controller.req_6(control,n_teams, tournament, year)
-    for team in teams:
-        team.pop('match_info')
+
     print(f'Total number of years with available information: {total_years}')
     print(f'Total tournaments with available information: {total_tournaments}')
     print(f'Total teams for {tournament}: {n_teams_y}')
@@ -213,7 +217,7 @@ def print_req_8(control):
     # TODO: Imprimir el resultado del requerimiento 8
     team = input("Ingrese el equipo: ")
     start_y = input("Ingrese el año de inicio: ")
-    end_y = input("Ingrese el año final: ")
+    end_y = input("Ingrese el año final: ") 
     elems, n_years, total_matches, home_matches, away_matches, oldest_date, newest_match, delta= controller.req_8(control, team, start_y, end_y)
     for elem in elems:
         elem.pop('dates')
