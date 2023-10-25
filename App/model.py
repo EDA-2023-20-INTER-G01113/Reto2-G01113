@@ -1033,7 +1033,7 @@ def req_5(data_structs, nombre, fecha_inicio, fecha_final):
                           
         total_scorers = mp.size(data_structs['jugador_goles'])
         total_anotaciones_jugador = lt.size(goles)
-        print(total_torneos)             
+       
         return periodo,total_scorers,total_anotaciones_jugador,total_torneos,total_penalty,total_autogol
     else:
         return "No se encuentran anotaciones realizadas por este jugador en el periodo de tiempo dado."  
