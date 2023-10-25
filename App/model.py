@@ -1248,9 +1248,7 @@ def mapa_final_añadir(mapa,valor):
     lt.addLast(lista["datos"],valor)
     return mapa
 
-
-    
-                
+       
 def name(nombre):
     nam={}
     nam["nombre"]=nombre
