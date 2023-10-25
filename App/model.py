@@ -994,7 +994,8 @@ def req_5(data_structs, nombre, fecha_inicio, fecha_final):
             fecha_goles = date.fromisoformat(fecha["date"]).year
             if fecha_goles >= anio_inicio and fecha_goles <= anio_final:
                 lt.addLast(periodo, fecha)
-          
+        
+        
         for cada_1 in lt.iterator(periodo):
             fecha = cada_1["date"]
             if mp.contains(data_structs["torneo_anio"],fecha):
@@ -1007,8 +1008,8 @@ def req_5(data_structs, nombre, fecha_inicio, fecha_final):
                     cada_1["home_score"] = home_score
                     cada_1["away_score"] = away_score
                     cada_1["tournament"] = tournament
-                             
-        return periodo           
+                     
+        return periodo  
     else:
         return "No se encuentran anotaciones realizadas por este jugador en el periodo de tiempo dado."  
     
