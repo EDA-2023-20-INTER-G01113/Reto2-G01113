@@ -80,11 +80,11 @@ Ingrese 6 si quiere cargar el 50 porciento de los datos
 Ingrese 7 si quiere cargar el 80 porciento de los datos
 Ingrese 8 si quiere cargar TODOS los datos."""
     data_size = int(input(message))
-    scorers, results, shootouts, n_results, n_shootouts, n_scores = controller.load_data(control, data_size)
-    return scorers, results, shootouts, n_results, n_shootouts, n_scores
+    scorers, results, shootouts, n_results, n_shootouts, n_scores, delta_m = controller.load_data(control, data_size)
+    return scorers, results, shootouts, n_results, n_shootouts, n_scores, delta_m
 
 def print_loaded_data(control):
-    scores, results, shootouts, n_results, n_shootouts, n_scores = load_data(control)
+    scores, results, shootouts, n_results, n_shootouts, n_scores, delta_m = load_data(control)
     print(f'{"-"*10}\n'
             f'Numero de partidos: {n_results}\n'
             f'Numero de penalties: {n_shootouts}\n'
@@ -95,7 +95,7 @@ def print_loaded_data(control):
     print(f'{tabulate(results,headers="keys",tablefmt="grid")}')
     print(f'\nResultados de penalties cargados: {n_shootouts}')
     print(f'{tabulate(shootouts,headers="keys",tablefmt="grid")}')
-
+    print(f'Espacio usado en la carga de datos: {delta_m}[kB]')
 def print_data(control, id):
     """
         Función que imprime un dato dado su ID
