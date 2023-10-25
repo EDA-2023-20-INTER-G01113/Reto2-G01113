@@ -125,7 +125,11 @@ def new_data_structs():
             "torneo_anio": mp.newMap(1000,
                                      maptype= "PROBING",
                                      loadfactor= 0.5,
-                                     cmpfunction=compare_elements)
+                                     cmpfunction=compare_elements),
+            "scorer_goals":mp.newMap(1000,
+                                     maptype= "PROBING",
+                                     loadfactor= 0.5,
+                                     cmpfunction=compare_elements),
     }
 
     
@@ -182,7 +186,7 @@ def add_element(data_structs, data, data_date):
         value = me.getValue(k_v)
         lt.addLast(value, data)
         mp.put(data_structs, data_date, value)
-    
+
 def add_shootout_date(data_structs, data):
     data_date = date.fromisoformat(data["date"])
     if not mp.contains(data_structs, data_date):
@@ -847,15 +851,20 @@ def req_2(data_structs, nombre, cant_goles):
     Función que soluciona el requerimiento 2
     """
     # TODO: Realizar el requerimiento 2
-     
+    total_scorers = mp.size(data_structs['jugador_goles'])
     if mp.contains(data_structs["jugador_goles"], nombre):
         goles_entry = mp.get(data_structs["jugador_goles"],nombre)
+        total_penalties = 0
         goles = me.getValue(goles_entry)
+        total_goles = lt.size(goles)
+        for gol in lt.iterator(goles):
+            if gol['penalty']=="True":
+                total_penalties+=1
         merg.sort(goles,cmp_crit_goal_req_2)
         if lt.size(goles) >= cant_goles:
             return lt.subList(goles, 1, cant_goles)
         else: 
-            return goles
+            return goles, total_goles, total_penalties, total_scorers
     else:
         return "El jugador no existe"
 

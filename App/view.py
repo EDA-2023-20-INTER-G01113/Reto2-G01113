@@ -122,8 +122,13 @@ def print_req_2(control, nombre,cant_goles):
         Función que imprime la solución del Requerimiento 2 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 2
-    
-    print(controller.req_2(control, nombre, cant_goles))
+    elems, n_goles, n_penalties, total_scorers = controller.req_2(control, nombre, cant_goles)
+    print(f'Number of scorers with available entries: {total_scorers}')
+    print(f'Total scores for {nombre}: {n_goles}')
+    print(f'Total penalties for {nombre}: {n_penalties}')
+    results = [x for x in lt.iterator(elems)]
+    print(f'{tabulate(results,headers="keys",tablefmt="grid")}')
+
 
 
 def print_req_3(control,date_inicial,data_final,team):

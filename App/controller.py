@@ -267,7 +267,7 @@ def req_2(control, nombre,cant_goles):
     Retorna el resultado del requerimiento 2
 
     """
-    goles = model.req_2(control["model"], nombre, cant_goles)
+    goles, n_goles, n_penalties, total_scorers = model.req_2(control["model"], nombre, cant_goles)
     if goles=="El jugador no existe":
         return goles
     respuesta = lt.newList("ARRAY_LIST")
@@ -282,7 +282,7 @@ def req_2(control, nombre,cant_goles):
     else:
         respuesta=goles
                 
-    return respuesta 
+    return respuesta, n_goles, n_penalties, total_scorers
 
 
 def req_3(control,date_inicial,date_final,team):
