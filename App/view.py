@@ -174,9 +174,14 @@ def print_req_5(control):
     nombre = input("Ingrese el nombre del jugador: ")
     fecha_inicial = input("Ingrese la fecha inicial del periodo: ")
     fecha_final = input("Ingrese la fecha final del periodo: ")
-    elems = controller.req_5(control, nombre,fecha_inicial, fecha_final)
+    elems,total_scorers,total_anotaciones_jugador,total_penalty,total_autogol = controller.req_5(control, nombre,fecha_inicial, fecha_final)
     lista = [x for x in lt.iterator(elems)]
+    print(f"Total players with avaiable information: {total_scorers}")
+    print(f"Total goals for {nombre}: {total_anotaciones_jugador}")
+    print(f"Total penalties for {nombre}: {total_penalty}")
+    print(f"Total autogoal for {nombre}: {total_autogol}")
     print(f'{tabulate(lista,headers="keys",tablefmt="grid")}')
+    
 
 def print_req_6(control):
     """

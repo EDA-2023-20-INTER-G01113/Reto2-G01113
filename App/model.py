@@ -1017,12 +1017,26 @@ def req_5(data_structs, nombre, fecha_inicio, fecha_final):
                     cada_1["home_score"] = home_score
                     cada_1["away_score"] = away_score
                     cada_1["tournament"] = tournament
+        
+        
+        total_penalty = 0
+        total_autogol = 0
+        
+        for gol in lt.iterator(goles):
+            if gol["penalty"] == "True":
+                total_penalty += 1
+            if gol["own_goal"] == "True":
+                total_autogol
+                total_autogol += 1
+                          
+        total_scorers = mp.size(data_structs['jugador_goles'])
+        total_anotaciones_jugador = lt.size(goles)
                      
-        return periodo  
+        return periodo,total_scorers,total_anotaciones_jugador,total_penalty,total_autogol
     else:
         return "No se encuentran anotaciones realizadas por este jugador en el periodo de tiempo dado."  
     
-    # TODO: Realizar el requerimiento 5
+
     
     
 
