@@ -49,9 +49,9 @@ def new_controller():
 # Funciones para la carga de datos
 def load_data(control, data_size):
     #Indica la ruta de los archivos
-    tracemalloc.start()
+    """ tracemalloc.start()
     start_memory = get_memory()
-
+ """
     filegoalscorers = load_goal_scorers(data_size)
     fileresults = load_results(data_size)
     fileshootouts = load_shootouts(data_size)
@@ -85,11 +85,11 @@ def load_data(control, data_size):
     return_shootouts=model.first_last_three_elems(shootouts, s_dates, n_shootouts)
     return_scores = model.first_last_three_elems(scores, sc_dates, n_scores)
 
-    stop_memory = get_memory()
+    """ stop_memory = get_memory()
     tracemalloc.stop()
-    delta_m = delta_memory(stop_memory, start_memory)
+    delta_m = delta_memory(stop_memory, start_memory) """
 
-    return return_scores, return_results, return_shootouts, n_results, n_shootouts, n_scores, delta_m
+    return return_scores, return_results, return_shootouts, n_results, n_shootouts, n_scores
     
 def load_data_lab7(control, maptype, loadfactor, memflag):
         try: 
