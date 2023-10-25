@@ -189,13 +189,13 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    tournament = "FIFA World Cup qualification"
+    """ tournament = "FIFA World Cup qualification"
     n_teams = 11
-    year=2021
+    year=2021 """
 
-    """ n_teams= input('Ingrese el número de equipos: ')
+    n_teams= input('Ingrese el número de equipos: ')
     tournament = input("Ingrese el torneo: ")
-    year= input("Ingrese el año: ") """
+    year= input("Ingrese el año: ") 
 
     teams,total_years, total_tournaments, n_teams_y, total_matches, n_countries, n_cities, pop_city,delta = controller.req_6(control,n_teams, tournament, year)
 
