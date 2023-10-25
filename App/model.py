@@ -862,7 +862,7 @@ def req_2(data_structs, nombre, cant_goles):
                 total_penalties+=1
         merg.sort(goles,cmp_crit_goal_req_2)
         if lt.size(goles) >= cant_goles:
-            return lt.subList(goles, 1, cant_goles)
+            return lt.subList(goles, 1, cant_goles), total_goles, total_penalties, total_scorers
         else: 
             return goles, total_goles, total_penalties, total_scorers
     else:
