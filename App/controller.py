@@ -279,7 +279,7 @@ def req_2(control, nombre,cant_goles):
 
     if lt.size(goles) > 6:
         primeros_tres = lt.subList(goles, 1 , 3)
-        ultimos_tres = lt.subList(goles, lt.size(goles) - 3, lt.size(goles))
+        ultimos_tres = lt.subList(goles, lt.size(goles) - 3, 3)
         for cada in lt.iterator(primeros_tres):
             lt.addLast(respuesta, cada)
         for cada in lt.iterator(ultimos_tres):
