@@ -1004,10 +1004,11 @@ def req_5(data_structs, nombre, fecha_inicio, fecha_final):
             if fecha_goles >= anio_inicio and fecha_goles <= anio_final:
                 lt.addLast(periodo, fecha)
         
-        
+        total_torneos = 0
         for cada_1 in lt.iterator(periodo):
             fecha = cada_1["date"]
             if mp.contains(data_structs["torneo_anio"],fecha):
+                total_torneos += 1
                 fechas_entry = mp.get(data_structs["torneo_anio"], fecha)
                 fechas_values = me.getValue(fechas_entry)
                 for cada_2 in lt.iterator(fechas_values):
@@ -1017,12 +1018,27 @@ def req_5(data_structs, nombre, fecha_inicio, fecha_final):
                     cada_1["home_score"] = home_score
                     cada_1["away_score"] = away_score
                     cada_1["tournament"] = tournament
-                     
-        return periodo  
+        
+        
+        total_penalty = 0
+        total_autogol = 0
+        
+        for gol in lt.iterator(goles):
+            if gol["penalty"] == "True":
+                total_penalty += 1
+            if gol["own_goal"] == "True":
+                total_autogol
+                total_autogol += 1
+        
+                          
+        total_scorers = mp.size(data_structs['jugador_goles'])
+        total_anotaciones_jugador = lt.size(goles)
+       
+        return periodo,total_scorers,total_anotaciones_jugador,total_torneos,total_penalty,total_autogol
     else:
         return "No se encuentran anotaciones realizadas por este jugador en el periodo de tiempo dado."  
     
-    # TODO: Realizar el requerimiento 5
+
     
     
 

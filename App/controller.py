@@ -338,9 +338,9 @@ def req_5(control, nombre, fecha_inicio, fecha_final):
     """
     Retorna el resultado del requerimiento 5
     """
-    periodo = model.req_5(control["model"], nombre, fecha_inicio, fecha_final)
+    periodo,total_scorers,total_anotaciones_jugador,total_torneos,total_penalty,total_autogol = model.req_5(control["model"], nombre, fecha_inicio, fecha_final)
     if periodo == "No se encuentran anotaciones realizadas por este jugador en el periodo de tiempo dado.":
-        return periodo
+        return periodo,total_scorers,total_anotaciones_jugador,total_torneos,total_penalty,total_autogol
     
     elif lt.size(periodo) > 6:
         primeros_tres = lt.subList(periodo, 1 , 3)
@@ -352,7 +352,7 @@ def req_5(control, nombre, fecha_inicio, fecha_final):
     else:
         respuesta=periodo
                 
-    return respuesta 
+    return respuesta, total_scorers,total_anotaciones_jugador,total_torneos,total_penalty,total_autogol 
     
     # TODO: Modificar el requerimiento 5
     
