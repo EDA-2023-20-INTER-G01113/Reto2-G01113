@@ -111,7 +111,8 @@ def print_req_1(control,team, condition,numero):
     print("Total teams with avalaible information: " + str(total_teams))
     print("Total matches for "+ str(team) + ": "+ str(total_partidos))
     print("Total matches for "+ str(team) + " as "+str(condition)+" : "+ str(total_condition))
-    print(resultados)
+    lista = [x for x in lt.iterator(resultados)]
+    print(f'{tabulate(lista,headers="keys",tablefmt="grid")}')
     print(delta)
     # TODO: Imprimir el resultado del requerimiento 1
     pass
@@ -140,7 +141,8 @@ def print_req_3(control,date_inicial,data_final,team):
     print("Total games for: "+str(team)+": " + str(ambos))
     print("Total home games: "+ str(home))
     print("total away games: " + str(away))
-    print(lista)
+    elems = [x for x in lt.iterator(lista)]
+    print(f'{tabulate(elems,headers="keys",tablefmt="grid")}')
     print(delta)
     # TODO: Imprimir el resultado del requerimiento 3
     pass
@@ -172,7 +174,9 @@ def print_req_5(control):
     nombre = input("Ingrese el nombre del jugador: ")
     fecha_inicial = input("Ingrese la fecha inicial del periodo: ")
     fecha_final = input("Ingrese la fecha final del periodo: ")
-    print(controller.req_5(control, nombre,fecha_inicial, fecha_final))
+    elems = controller.req_5(control, nombre,fecha_inicial, fecha_final)
+    lista = [x for x in lt.iterator(elems)]
+    print(f'{tabulate(lista,headers="keys",tablefmt="grid")}')
 
 def print_req_6(control):
     """
@@ -214,7 +218,12 @@ def print_req_7(control,torneo,numero):
     print("Total penalties for "+ str(torneo)+ " : " +str(penalties))
     print("Total own goals for "+ str(torneo)+ " : " +str(autogoles))
     print("Total players with "+ str(numero)+ " points : " +str(total_player))
-    print(resultado)
+    lista = []
+    for x in lt.iterator(resultado):
+        info = dict(x)
+        info['last_goal'] = tabulate([info['last_goal']],headers="keys",tablefmt="grid")
+        lista.append(info)
+    print(f'{tabulate(lista,headers="keys",tablefmt="grid")}')
     print(delta)
 
 
